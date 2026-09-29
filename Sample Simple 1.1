@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sample Simple | โปรแกรมคำนวณขนาดตัวอย่าง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF3F1;--surface:#FFFFFF;--ink:#15302A;--muted:#5B706A;--line:#C9D8D3;
+  --scrub:#2C6B5E;--scrub-ink:#FFFFFF;--scrub-soft:#D6E8E2;--mark:#F5D96B;--warn:#9A4B00;--warn-bg:#FFF3DC;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1A17;--surface:#152521;--ink:#E3EEEA;--muted:#93A9A2;--line:#29403A;
+  --scrub:#6FC0AA;--scrub-ink:#0E1A17;--scrub-soft:#1E3832;--mark:#7A6620;--warn:#F2B866;--warn-bg:#2E2412;}}
+:root[data-theme="dark"]{--bg:#0E1A17;--surface:#152521;--ink:#E3EEEA;--muted:#93A9A2;--line:#29403A;
+  --scrub:#6FC0AA;--scrub-ink:#0E1A17;--scrub-soft:#1E3832;--mark:#7A6620;--warn:#F2B866;--warn-bg:#2E2412;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Noto Sans Thai","Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:1rem;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:88rem;margin:0 auto;padding:2rem 1.25rem 3rem}
+.htools{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.htools .lang button{padding:.45rem .9rem;font-size:.92rem}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem}
+header h1{font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.2;margin:0 0 .3rem;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:44rem}
+.guide{font:inherit;font-weight:600;font-size:1rem;background:var(--scrub);color:var(--scrub-ink);border:none;border-radius:12px;padding:.75rem 1.2rem;cursor:pointer;white-space:nowrap}
+.guide:hover{filter:brightness(1.08)}
+.layout{display:grid;grid-template-columns:18rem minmax(0,1fr);gap:1.5rem;margin-top:1.75rem;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 1rem);max-height:calc(100vh - 2rem);overflow:auto;padding-right:.25rem}
+.search{width:100%;font:inherit;font-size:.95rem;padding:.55rem .75rem;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.cat h3{font-size:.9rem;font-weight:600;color:var(--scrub);margin:1.1rem 0 .3rem;line-height:1.35}
+.cat h3 small{display:block;font-weight:400;color:var(--muted);font-size:.78rem}
+.cat button{display:block;width:100%;text-align:left;font:inherit;font-size:.92rem;line-height:1.35;border:none;background:transparent;color:var(--ink);padding:.45rem .65rem;border-radius:8px;cursor:pointer}
+.cat button small{display:block;font-size:.76rem;color:var(--muted);margin-top:.1rem}
+.cat button:hover{background:var(--scrub-soft)}
+.cat button[aria-pressed="true"]{background:var(--scrub);color:var(--scrub-ink);font-weight:600}
+.cat button[aria-pressed="true"] small{color:var(--scrub-ink);opacity:.85}
+.mobilepick{display:none}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.side{display:none}.mobilepick{display:block;margin-top:1.25rem}}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,25rem);gap:1.5rem;align-items:start}
+@media (max-width:1180px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.5rem}
+.phead{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+.panel h2{font-size:1.3rem;margin:0;font-weight:600;line-height:1.35}
+.en{margin:.1rem 0 0;color:var(--muted);font-size:.9rem}
+.panel .sub{margin:.6rem 0 1.25rem;font-size:.95rem}
+.reset{font:inherit;font-size:.85rem;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:.3rem .7rem;cursor:pointer;white-space:nowrap}
+.reset:hover{color:var(--ink);border-color:var(--ink)}
+.group-title{font-size:.95rem;font-weight:600;color:var(--scrub);margin:1.5rem 0 .75rem;padding-top:1.25rem;border-top:1px dashed var(--line)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem 1.25rem}
+.field label{display:block;font-weight:500;font-size:.93rem;margin-bottom:.3rem;line-height:1.4}
+.inputrow{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+.inputrow:focus-within{border-color:var(--scrub)}
+.inputrow input,.inputrow select{flex:1;min-width:0;font:inherit;font-size:1.02rem;border:none;background:transparent;color:var(--ink);padding:.55rem .75rem;font-variant-numeric:tabular-nums}
+.inputrow select{cursor:pointer}
+.inputrow select option{background:var(--surface);color:var(--ink)}
+.inputrow input:focus-visible,.inputrow select:focus-visible{outline:none}
+.inputrow input:disabled{color:var(--muted)}
+.unit{padding:.55rem .75rem;color:var(--muted);font-size:.88rem;border-left:1px solid var(--line);display:flex;align-items:center;white-space:nowrap}
+.help{font-size:.82rem;color:var(--muted);margin-top:.3rem;line-height:1.5}
+.help:empty{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+.chips button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
+.chips button:hover{border-color:var(--scrub)}
+.chips button.on{background:var(--scrub-soft);border-color:var(--scrub);font-weight:600}
+.toggle{display:flex;align-items:center;gap:.6rem;font-size:.93rem;font-weight:500;cursor:pointer;margin-top:1rem}
+.toggle input{width:1.1rem;height:1.1rem;accent-color:var(--scrub)}
+#clusterBox{margin-top:1rem}
+.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 1rem)}
+.big-label{color:var(--muted);font-size:.95rem;margin:0}
+.big{font-size:clamp(3.25rem,8vw,5rem);font-weight:700;line-height:1;margin:.35rem 0 .5rem;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.big span{background:linear-gradient(transparent 62%,var(--mark) 62%);padding:0 .08em}
+.big small{font-size:1.1rem;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:.35rem}
+.split{margin:0 0 1.25rem;font-size:.95rem}
+.split:empty{display:none}
+.ladder{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.ladder li{display:flex;justify-content:space-between;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.ladder li .v{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.ladder li.off{color:var(--muted)}
+.ladder li.off .v{font-weight:400}
+.formula{margin-top:1.25rem;background:var(--scrub-soft);border-radius:10px;padding:.85rem 1rem;font-size:.88rem;overflow-x:auto}
+.formula b{display:block;font-size:.95rem;margin-bottom:.25rem;white-space:nowrap}
+.formula .s{white-space:nowrap;color:var(--muted)}
+.extra{margin-top:.75rem;font-size:.88rem;border-left:3px solid var(--scrub);padding:.2rem 0 .2rem .75rem}
+.note{margin-top:.75rem;font-size:.88rem;border-left:3px solid var(--mark);padding:.2rem 0 .2rem .75rem}
+.extra:empty,.note:empty{display:none}
+.warn{display:none;margin-top:1rem;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:.7rem .9rem;font-size:.9rem}
+.warn.show{display:block}
+.para{margin-top:1.5rem}
+.para-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:.5rem}
+.para-head h3{font-size:1rem;margin:0;font-weight:600}
+.copy{font:inherit;font-size:.9rem;font-weight:600;border:1.5px solid var(--scrub);color:var(--scrub);background:transparent;border-radius:8px;padding:.35rem .8rem;cursor:pointer;white-space:nowrap}
+.copy:hover{background:var(--scrub);color:var(--scrub-ink)}
+#paragraph{margin:0;padding:1rem;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:.95rem;line-height:1.85;text-indent:2em}
+details.panel summary{cursor:pointer;font-weight:600;font-size:1rem}
+details.panel summary span{color:var(--scrub);font-weight:500;font-size:.9rem;margin-left:.4rem}
+.val{border-collapse:collapse;width:100%;min-width:40rem;font-size:.88rem}
+.val th,.val td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+.val th{font-weight:600;color:var(--muted)}
+.val td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ok{color:var(--scrub);font-weight:600;white-space:nowrap}
+.bad{color:var(--warn);font-weight:600}
+.byline{margin-top:.5rem !important;font-size:.9rem}
+.byline a{color:var(--scrub);font-weight:600}
+.refhead{margin-top:1.75rem;padding-top:1.25rem;border-top:1px dashed var(--line)}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin-top:.75rem}
+.actions .help{margin:0}
+.lang{display:inline-flex;border:1.5px solid var(--scrub);border-radius:999px;overflow:hidden;flex-shrink:0}
+.lang button{font:inherit;font-size:.88rem;font-weight:600;border:none;background:transparent;color:var(--scrub);padding:.3rem .9rem;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--scrub);color:var(--scrub-ink)}
+.refs p{margin:0 0 .6rem;padding-left:2em;text-indent:-2em;font-size:.92rem;line-height:1.7;overflow-wrap:anywhere}
+footer.site{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--line);font-size:.88rem;color:var(--muted)}
+footer.site p{margin:.2rem 0}
+footer.site b{color:var(--ink);font-weight:600}
+footer.site .app{font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+footer.site .app span{font-size:.85rem;font-weight:400;color:var(--muted);margin-left:.4rem}
+footer.site .co{margin-top:.6rem}
+footer.site .copyr{margin-top:.8rem}
+.foot{margin-top:2rem;color:var(--muted);font-size:.85rem;max-width:52rem}
+/* decision guide */
+dialog{border:none;border-radius:16px;padding:0;width:min(40rem,calc(100vw - 2rem));max-height:calc(100vh - 2rem);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(8,30,25,.35)}
+dialog::backdrop{background:rgba(10,28,24,.55)}
+.dlg{padding:1.5rem}
+.dlg-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:.25rem}
+.dlg-top p{margin:0;color:var(--muted);font-size:.88rem}
+.x{font:inherit;font-size:1.4rem;line-height:1;background:transparent;border:none;color:var(--muted);cursor:pointer;padding:.25rem .5rem;border-radius:8px}
+.x:hover{color:var(--ink)}
+.dlg h2{font-size:1.25rem;margin:.25rem 0 1rem;line-height:1.35}
+.opts{display:grid;gap:.6rem}
+.opt{display:block;width:100%;text-align:left;font:inherit;background:var(--bg);border:1.5px solid var(--line);color:var(--ink);border-radius:12px;padding:.8rem 1rem;cursor:pointer}
+.opt:hover{border-color:var(--scrub)}
+.opt b{display:block;font-weight:600;font-size:1rem}
+.opt span{display:block;font-size:.85rem;color:var(--muted);margin-top:.15rem}
+.back{font:inherit;font-size:.9rem;background:transparent;border:none;color:var(--scrub);cursor:pointer;padding:.4rem 0;margin-top:1rem}
+.rec{background:var(--scrub-soft);border-radius:12px;padding:1.1rem 1.2rem}
+.rec b{display:block;font-size:1.15rem}
+.rec i{display:block;font-style:normal;color:var(--muted);font-size:.9rem;margin-bottom:.4rem}
+.rec p{margin:0;font-size:.93rem}
+.use{font:inherit;font-weight:600;background:var(--scrub);color:var(--scrub-ink);border:none;border-radius:10px;padding:.7rem 1.2rem;cursor:pointer;margin-top:1rem}
+/* mobile result bar */
+.mbar{display:none}
+@media (max-width:1180px){
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;align-items:center;justify-content:space-between;gap:1rem;
+    background:var(--scrub);color:var(--scrub-ink);padding:.7rem 1.25rem;padding-bottom:calc(.7rem + env(safe-area-inset-bottom,0px));font-size:.95rem}
+  .mbar b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+  .mbar button{font:inherit;font-weight:600;background:var(--scrub-ink);color:var(--scrub);border:none;border-radius:8px;padding:.4rem .9rem;cursor:pointer}
+  .wrap{padding-bottom:6rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Sample Simple</h1>
+      <p data-t="sub">โปรแกรมคำนวณขนาดตัวอย่างสำหรับงานวิจัยทางด้านการแพทย์ สาธารณสุข และวิทยาศาสตร์สุขภาพ</p>
+      <p class="byline" data-t="by">พัฒนาโดย รศ.ดร.รัชฎาภรณ์ อึ้งเจริญ คณะสาธารณสุขศาสตร์ มหาวิทยาลัยเกษตรศาสตร์</p>
+    </div>
+    <div class="htools"><div class="lang" role="group" aria-label="ภาษา / Language"><button type="button" data-lang="th" aria-pressed="true">ไทย</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div><button class="guide" id="guideBtn" type="button" data-t="guide">ช่วยเลือกสูตร</button></div>
+  </header>
+
+  <div class="mobilepick"><div class="inputrow"><select id="mselect" aria-label="เลือกวิธีคำนวณ"></select></div></div>
+
+  <div class="layout">
+    <nav class="side" aria-label="วิธีคำนวณ">
+      <input class="search" id="search" type="search" placeholder="ค้นหา เช่น cohort, ANOVA, ความชุก" aria-label="ค้นหาวิธีคำนวณ">
+      <div id="nav"></div>
+    </nav>
+
+    <main>
+      <div class="grid">
+        <section class="panel" aria-labelledby="calcName">
+          <div class="phead">
+            <div><h2 id="calcName"></h2><p class="en" id="calcEn"></p></div>
+            <button class="reset" id="resetBtn" type="button" data-t="reset">คืนค่าเริ่มต้น</button>
+          </div>
+          <p class="sub" id="calcHint"></p>
+          <div class="fields" id="fields"></div>
+
+          <div id="statBlock">
+            <div class="group-title" data-t="stat">เกณฑ์ทางสถิติ</div>
+            <div class="fields">
+              <div class="field" id="alphaField"><label for="alpha" data-t="alpha">ระดับนัยสำคัญ (α)</label>
+                <div class="inputrow"><select id="alpha">
+                  <option value="0.05" selected data-t="a05">0.05 (ความเชื่อมั่น 95%)</option>
+                  <option value="0.01" data-t="a01">0.01 (ความเชื่อมั่น 99%)</option>
+                  <option value="0.10" data-t="a10">0.10 (ความเชื่อมั่น 90%)</option>
+                  <option value="0.025">0.025</option>
+                </select></div><div class="help" id="alphaHelp"></div></div>
+              <div class="field" id="tailField"><label for="tail" data-t="tail">ทิศทางการทดสอบ</label>
+                <div class="inputrow"><select id="tail"><option value="2" selected data-t="two">สองทาง (two-sided)</option><option value="1" data-t="one">ทางเดียว (one-sided)</option></select></div></div>
+              <div class="field" id="powerField"><label for="power" data-t="power">อำนาจการทดสอบ (power, 1 − β)</label>
+                <div class="inputrow"><select id="power"><option value="0.80" selected>80%</option><option value="0.85">85%</option><option value="0.90">90%</option><option value="0.95">95%</option></select></div></div>
+            </div>
+          </div>
+
+          <div class="group-title" data-t="adj">การปรับขนาดตัวอย่าง</div>
+          <div class="fields">
+            <div class="field"><label for="dropout" data-t="drop">อัตราการสูญหาย (drop-out / non-response)</label>
+              <div class="inputrow"><input id="dropout" type="number" inputmode="decimal" value="10" min="0" max="50" step="1"><span class="unit">%</span></div>
+              <div class="chips" id="dropChips"><button type="button" data-v="0">0%</button><button type="button" data-v="10">10%</button><button type="button" data-v="15">15%</button><button type="button" data-v="20">20%</button></div></div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="clusterOn"> <span data-t="cluster">ใช้การสุ่มแบบกลุ่ม (cluster sampling)</span></label>
+          <div id="clusterBox" hidden>
+            <div class="fields">
+              <div class="field"><label for="deff">Design effect (DEFF)</label>
+                <div class="inputrow"><input id="deff" type="number" inputmode="decimal" value="1.5" min="1" max="10" step="0.1"></div>
+                <div class="help" id="deffHelp">นิยมใช้ 1.5–2 หรือคำนวณจาก ICC</div></div>
+              <div class="field"><label for="cm" data-t="cm">ขนาดเฉลี่ยต่อกลุ่ม (m)</label>
+                <div class="inputrow"><input id="cm" type="number" inputmode="decimal" placeholder="ไม่ระบุ" min="1" step="1"></div></div>
+              <div class="field"><label for="icc" data-t="icc">สหสัมพันธ์ภายในกลุ่ม (ICC)</label>
+                <div class="inputrow"><input id="icc" type="number" inputmode="decimal" placeholder="ไม่ระบุ" min="0" max="1" step="0.01"></div>
+                <div class="help" data-t="iccHelp">ถ้ากรอก m และ ICC จะคำนวณ DEFF = 1 + (m − 1) × ICC ให้อัตโนมัติ</div></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel result" id="resultPanel" aria-live="polite">
+          <p class="big-label" id="bigLabel">ขนาดตัวอย่างที่ต้องใช้</p>
+          <p class="big"><span id="bigN">–</span><small id="bigUnit">คน</small></p>
+          <p class="split" id="split"></p>
+          <ol class="ladder" id="ladder"></ol>
+          <div class="formula"><b id="formula"></b><div class="s" id="subst"></div></div>
+          <div class="extra" id="extra"></div>
+          <div class="note" id="note"></div>
+          <div class="warn" id="warn"></div>
+        </aside>
+      </div>
+
+      <section class="panel para" id="outSection">
+        <div class="para-head">
+          <h3 id="paraTitle">ย่อหน้าสำหรับบทวิธีดำเนินการวิจัย</h3>
+        </div>
+        <p id="paragraph"></p>
+        <div class="actions"><button class="copy" id="copyBtn" type="button">คัดลอกย่อหน้า</button></div>
+        <div class="para-head refhead"><h3 id="refTitle">เอกสารอ้างอิง (APA 7th)</h3></div>
+        <div class="refs" id="refList"></div>
+        <div class="actions"><button class="copy" id="copyRefs" type="button">คัดลอกเอกสารอ้างอิง</button><span class="help" id="refHelp">วางใน Word แล้วตัวเอียงจะติดไปด้วย</span></div>
+      </section>
+
+      <p class="foot" data-t="foot">สูตรทุกสูตรตรวจสอบกับเอกสารต้นฉบับและค่าอ้างอิงที่ตีพิมพ์แล้ว ความถูกต้องของผลลัพธ์จึงขึ้นอยู่กับค่าพารามิเตอร์ที่กรอก ซึ่งควรอ้างอิงจากงานวิจัยที่ผ่านมาหรือการศึกษานำร่อง และแทนที่ [แหล่งอ้างอิง] ในย่อหน้าด้วยเอกสารจริง</p>
+    </main>
+  </div>
+  <footer class="site">
+    <p class="app">Sample Simple <span><span data-t="ver">เวอร์ชัน</span> 1.0</span></p>
+    <p><b>ผู้พัฒนา</b> รศ.ดร.รัชฎาภรณ์ อึ้งเจริญ คณะสาธารณสุขศาสตร์ มหาวิทยาลัยเกษตรศาสตร์</p>
+    <p><b>Developer</b> Assoc. Prof. Dr. Ratchadaporn Ungcharoen, Faculty of Public Health, Kasetsart University</p>
+    <p class="co"><b>ผู้ร่วมสร้างสรรค์</b> พัสกร องอาจ</p>
+    <p><b>Co-creator</b> Passakorn Ongarj</p>
+    <p class="copyr">© 2569 (2026) รัชฎาภรณ์ อึ้งเจริญ สงวนลิขสิทธิ์ ห้ามทำซ้ำ ดัดแปลง หรือเผยแพร่ส่วนใดส่วนหนึ่งของโปรแกรมโดยไม่ได้รับอนุญาต<br>Copyright © 2026 Ratchadaporn Ungcharoen. All rights reserved.</p>
+  </footer>
+</div>
+
+<div class="mbar" id="mbar"><span><span data-t="mbar">ต้องใช้</span> <b id="mbarN">–</b> <span id="mbarU">คน</span></span><button type="button" id="mbarBtn" data-t="mbtn">ดูรายละเอียด</button></div>
+
+<dialog id="dlg" aria-labelledby="dlgQ">
+  <div class="dlg">
+    <div class="dlg-top"><p id="dlgStep">ตอบคำถามสั้นๆ เพื่อเลือกวิธีคำนวณที่เหมาะสม</p><button class="x" id="dlgClose" type="button" aria-label="ปิด">×</button></div>
+    <div id="dlgBody"></div>
+  </div>
+</dialog>
+<script>
+// ---------- numerics ----------
+function qnorm(p){
+  const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239];
+  const b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572];
+  const c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783];
+  const d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+  const pl=0.02425,ph=1-pl;let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p<=ph){q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+function lgamma(x){
+  const C=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x<0.5)return Math.log(Math.PI/Math.abs(Math.sin(Math.PI*x)))-lgamma(1-x);
+  x-=1;let s=C[0];const t=x+7.5;for(let i=1;i<9;i++)s+=C[i]/(x+i);
+  return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(s);
+}
+function betacf(a,b,x){
+  const FP=1e-300;const qab=a+b,qap=a+1,qam=a-1;let c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;
+  for(let m=1;m<=3000;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;
+    if(Math.abs(del-1)<1e-14)break;}
+  return h;
+}
+function ibeta(x,a,b){
+  if(x<=0)return 0;if(x>=1)return 1;
+  const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;
+}
+function gammp(a,x){
+  if(x<=0)return 0;const gln=lgamma(a);
+  if(x<a+1){let ap=a,sum=1/a,del=sum;for(let n=0;n<10000;n++){ap+=1;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-15)break;}
+    return Math.min(1,sum*Math.exp(-x+a*Math.log(x)-gln));}
+  let b=x+1-a,c=1e300,d=1/b,h=d;
+  for(let i=1;i<10000;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-15)break;}
+  return Math.max(0,1-Math.exp(-x+a*Math.log(x)-gln)*h);
+}
+function poisMix(lam,fn){
+  const h=lam/2;if(h<=0)return fn(0);
+  const sd=Math.sqrt(h),j0=Math.max(0,Math.floor(h-12*sd-20)),j1=Math.ceil(h+12*sd+20);let s=0;
+  for(let j=j0;j<=j1;j++){const w=Math.exp(-h+j*Math.log(h)-lgamma(j+1));if(w<1e-17)continue;s+=w*fn(j);}
+  return s;
+}
+function pF(x,d1,d2,lam=0){if(x<=0)return 0;const u=d1*x/(d1*x+d2);return poisMix(lam,j=>ibeta(u,d1/2+j,d2/2));}
+function qF(p,d1,d2){let lo=0,hi=4;while(pF(hi,d1,d2)<p)hi*=2;
+  for(let i=0;i<200&&hi-lo>1e-10*hi;i++){const m=(lo+hi)/2;if(pF(m,d1,d2)<p)lo=m;else hi=m;}return (lo+hi)/2;}
+function pChi(x,k,lam=0){if(x<=0)return 0;return poisMix(lam,j=>gammp(k/2+j,x/2));}
+function qChi(p,k,lam=0){const mu=k+lam,sd=Math.sqrt(2*(k+2*lam));let lo=Math.max(0,mu-15*sd),hi=mu+15*sd;
+  while(pChi(hi,k,lam)<p)hi*=2;
+  for(let i=0;i<200&&hi-lo>1e-9*hi;i++){const m=(lo+hi)/2;if(pChi(m,k,lam)<p)lo=m;else hi=m;}return (lo+hi)/2;}
+function findN(min,pw,target,max=500000){
+  if(pw(min)>=target)return min;let lo=min,hi=Math.max(min*2,min+4);
+  while(pw(hi)<target){lo=hi;hi*=2;if(hi>max)return NaN;}
+  while(hi-lo>1){const m=Math.floor((lo+hi)/2);if(pw(m)>=target)hi=m;else lo=m;}return hi;
+}
+// t-test power via F(1,df) with noncentrality delta^2
+function tPower(delta,df,alpha,tails){const a=tails===2?alpha:2*alpha;const cr=qF(1-a,1,df);return 1-pF(cr,1,df,delta*delta);}
+function exactOneT(d,alpha,tails,power){const pw=n=>tPower(d*Math.sqrt(n),n-1,alpha,tails);const n=findN(2,pw,power);return {n,pw:pw(n)};}
+function exactTwoT(d,k,alpha,tails,power){const n2=n=>Math.ceil(k*n);const pw=n=>tPower(d*Math.sqrt(n*n2(n)/(n+n2(n))),n+n2(n)-2,alpha,tails);const n=findN(2,pw,power);return {n1:n,n2:n2(n),pw:pw(n)};}
+function fTestN(f2,df1,dfLoss,minN,alpha,power){const pw=N=>{const cr=qF(1-alpha,df1,N-dfLoss);return 1-pF(cr,df1,N-dfLoss,f2*N);};const N=findN(minN,pw,power);return {N,pw:pw(N)};}
+function semN(df,e0,ea,alpha,power){
+  const pw=N=>{const l0=(N-1)*df*e0*e0,la=(N-1)*df*ea*ea;
+    if(ea>e0){const cr=qChi(1-alpha,df,l0);return 1-pChi(cr,df,la);}
+    const cr=qChi(alpha,df,l0);return pChi(cr,df,la);};
+  const N=findN(10,pw,power);return {N,pw:pw(N)};
+}
+function twoPropN(p1,p2,k,z,cc){
+  const pb=(p1+k*p2)/(1+k);
+  let n=Math.pow(z.a*Math.sqrt((1+1/k)*pb*(1-pb))+z.b*Math.sqrt(p1*(1-p1)+p2*(1-p2)/k),2)/Math.pow(p1-p2,2);
+  if(cc)n=n/4*Math.pow(1+Math.sqrt(1+2*(k+1)/(n*k*Math.abs(p1-p2))),2);
+  return {n,pb};
+}
+// ---------- helpers ----------
+const f=(x,k=2)=>Number(x).toFixed(k);
+const int=x=>Math.round(x).toLocaleString('en-US');
+const pr=x=>x/100;
+const one=n=>[{label:'',n,mult:1}];
+const eq=(n,m,label='กลุ่มละ')=>[{label,n,mult:m}];
+const grp=(k,n1,l1,l2)=>k===1?eq(n1,2):[{label:l1,n:n1,mult:1},{label:l2,n:n1*k,mult:1}];
+const RATIO={id:'k',label:'อัตราส่วนกลุ่มที่ 2 ต่อกลุ่มที่ 1 (k)',unit:'เท่า',def:1,min:0.1,max:10,step:0.5,help:'1 หมายถึงสองกลุ่มเท่ากัน'};
+const NOPT={id:'N',label:'ขนาดประชากร (N)',unit:'คน',def:'',min:1,step:1,optional:true,help:'เว้นว่างถ้าไม่ทราบหรือประชากรมีขนาดใหญ่มาก'};
+const METHOD={id:'cc',label:'วิธีคำนวณ',type:'select',def:'f',options:[['f','Fleiss'],['k','Kelsey'],['fc','Fleiss ปรับความต่อเนื่อง (continuity correction)']],help:'ทั้งสามวิธีเป็นมาตรฐานสากล แบบปรับความต่อเนื่องให้ค่ามากที่สุด'};
+const MNAME={f:'Fleiss, Levin, และ Paik (2003)',k:'Kelsey, Whittemore, Evans, และ Thompson (1996)',fc:'Fleiss, Levin, และ Paik (2003) ร่วมกับการปรับความต่อเนื่อง'};
+function propN(p1,p2,k,z,m){
+  const pb=(p1+k*p2)/(1+k);
+  const kel=(z.a+z.b)**2*pb*(1-pb)*(k+1)/(k*(p1-p2)**2);
+  const fl=twoPropN(p1,p2,k,z,false).n, fc=twoPropN(p1,p2,k,z,true).n;
+  const n={k:kel,f:fl,fc}[m];
+  const formula=m==='k'?'n₁ = (Zα + Zβ)²·p̄q̄·(k + 1) / [k(p₁ − p₂)²]':'n₁ = [Zα√((1+1/k)p̄q̄) + Zβ√(p₁q₁ + p₂q₂/k)]² / (p₁ − p₂)²'+(m==='fc'?'  →  n₁′ = (n₁/4)[1 + √(1 + 2(k+1)/(n₁k|p₁−p₂|))]²':'');
+  const extra=`เปรียบเทียบสามวิธี (กลุ่มที่ 1): Kelsey ${Math.ceil(kel-1e-9)}, Fleiss ${Math.ceil(fl-1e-9)}, Fleiss ปรับความต่อเนื่อง ${Math.ceil(fc-1e-9)}`;
+  return {n,pb,formula,extra};
+}
+const REF='[แหล่งอ้างอิง]';
+
+const CATS=[['desc','สำรวจและพรรณนา'],['comp','เปรียบเทียบกลุ่ม'],['reg','ความสัมพันธ์และการถดถอย'],['epi','ระบาดวิทยา'],['sem','SEM และ CFA'],['diag','การทดสอบวินิจฉัย']];
+
+const CALCS={
+// ===== descriptive =====
+prop:{cat:'desc',name:'ประมาณค่าสัดส่วน / ความชุก',hint:'การศึกษาภาคตัดขวาง เช่น ความชุกของโรคเบาหวานในชุมชน หรือร้อยละของผู้มีพฤติกรรมเสี่ยง',
+  fields:[{id:'p',label:'สัดส่วนที่คาดไว้ (p)',unit:'%',def:30,min:0.1,max:99.9,step:0.1,help:'จากงานวิจัยที่ผ่านมา ถ้าไม่มีข้อมูลให้ใช้ 50'},
+    {id:'d',label:'ความคลาดเคลื่อนที่ยอมรับได้ (d)',unit:'%',def:5,min:0.1,max:50,step:0.5,help:'ค่าสัมบูรณ์ 5 = ±5 จุดร้อยละ, ค่าสัมพัทธ์ 20 = ±20% ของ p'},
+    {id:'dt',label:'ชนิดของความคลาดเคลื่อน',type:'select',def:'abs',options:[['abs','ค่าสัมบูรณ์ (absolute)'],['rel','ค่าสัมพัทธ์ (relative)']],help:'ความชุกต่ำกว่า 10% ควรใช้ค่าสัมพัทธ์'},NOPT],
+  compute(v,z){const p=pr(v.p),d=v.dt==='rel'?pr(v.d)*p:pr(v.d),n0=z.a**2*p*(1-p)/d**2;
+    const sub=`d = ${f(d,4)},  n₀ = ${f(z.a)}² × ${f(p,3)} × ${f(1-p,3)} / ${f(d,4)}² = ${f(n0)}`;
+    if(v.N>0){const n=n0/(1+(n0-1)/v.N);return {groups:one(n),formula:'n = n₀ / [1 + (n₀ − 1)/N],  n₀ = Z²p(1−p) / d²',sub:sub+`  →  ปรับด้วย N = ${int(v.N)} ได้ ${f(n)}`};}
+    return {groups:one(n0),formula:'n = Z²p(1−p) / d²',sub};},
+  warn(v){const p=pr(v.p),d=v.dt==='rel'?pr(v.d)*p:pr(v.d);if(d>=Math.min(p,1-p))return 'ค่า d มากเกินไปเมื่อเทียบกับ p ช่วงความเชื่อมั่นจะติดลบหรือเกิน 100% ควรลด d หรือเปลี่ยนเป็นค่าสัมพัทธ์';},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรการประมาณค่าสัดส่วนของประชากร${v.N>0?'กรณีทราบขนาดประชากร':'กรณีไม่ทราบขนาดประชากร'} (Daniel, 1999) ${v.N>0?`จากประชากรทั้งหมด ${int(v.N)} คน `:''}กำหนดสัดส่วนที่คาดไว้เท่ากับร้อยละ ${v.p} ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ความคลาดเคลื่อนที่ยอมรับได้${v.dt==='rel'?`แบบสัมพัทธ์ร้อยละ ${v.d} ของค่าสัดส่วน`:`ร้อยละ ${v.d}`} ${r.stat} ${r.tail}`},
+
+mean:{cat:'desc',name:'ประมาณค่าเฉลี่ย',hint:'เช่น ค่าเฉลี่ยระดับน้ำตาลในเลือด หรือคะแนนความรู้ของกลุ่มตัวอย่าง',
+  fields:[{id:'sd',label:'ส่วนเบี่ยงเบนมาตรฐาน (σ)',unit:'หน่วย',def:15,min:0.001,step:0.1,help:'จากงานวิจัยที่ผ่านมาหรือการศึกษานำร่อง'},
+    {id:'d',label:'ความคลาดเคลื่อนที่ยอมรับได้ (d)',unit:'หน่วย',def:3,min:0.001,step:0.1,help:'หน่วยเดียวกับ σ'},NOPT],
+  compute(v,z){const n0=z.a**2*v.sd**2/v.d**2,sub=`n₀ = ${f(z.a)}² × ${v.sd}² / ${v.d}² = ${f(n0)}`;
+    if(v.N>0){const n=n0/(1+(n0-1)/v.N);return {groups:one(n),formula:'n = n₀ / [1 + (n₀ − 1)/N],  n₀ = Z²σ² / d²',sub:sub+`  →  ปรับด้วย N = ${int(v.N)} ได้ ${f(n)}`};}
+    return {groups:one(n0),formula:'n = Z²σ² / d²',sub};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรการประมาณค่าเฉลี่ยของประชากร (Daniel, 1999) กำหนดส่วนเบี่ยงเบนมาตรฐานเท่ากับ ${v.sd} ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ความคลาดเคลื่อนที่ยอมรับได้เท่ากับ ${v.d} ${v.N>0?`ขนาดประชากร ${int(v.N)} คน `:''}${r.stat} ${r.tail}`},
+
+yamane:{cat:'desc',name:'สูตรของ Yamane',hint:'ใช้กับการสำรวจเชิงพรรณนาที่ทราบขนาดประชากร',noAlpha:true,
+  fields:[{id:'N',label:'ขนาดประชากร (N)',unit:'คน',def:1000,min:1,step:1,help:'จำนวนประชากรทั้งหมด'},
+    {id:'e',label:'ความคลาดเคลื่อน (e)',unit:'%',def:5,min:1,max:20,step:1,help:'นิยมใช้ 5'}],
+  compute(v){const e=pr(v.e),n=v.N/(1+v.N*e*e);return {groups:one(n),formula:'n = N / (1 + Ne²)',sub:`n = ${int(v.N)} / (1 + ${int(v.N)} × ${f(e,2)}²) = ${f(n)}`};},
+  note:()=>'สูตรนี้สมมติ p = 0.5 และความเชื่อมั่น 95% เหมาะกับการสำรวจเชิงพรรณนาเท่านั้น ไม่เหมาะกับงานที่ทดสอบสมมติฐานหรือหาปัจจัยที่มีผล',
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรของ Yamane (1967) จากประชากรทั้งหมด ${int(v.N)} คน กำหนดความคลาดเคลื่อนร้อยละ ${v.e} ที่ระดับความเชื่อมั่นร้อยละ 95 ${r.tail}`},
+
+krejcie:{cat:'desc',name:'สูตรของ Krejcie & Morgan',hint:'ใช้กับการสำรวจที่ทราบขนาดประชากร เป็นที่มาของตารางสำเร็จรูป Krejcie & Morgan',noTail:true,
+  fields:[{id:'N',label:'ขนาดประชากร (N)',unit:'คน',def:1000,min:1,step:1,help:'จำนวนประชากรทั้งหมด'},
+    {id:'p',label:'สัดส่วนของลักษณะที่สนใจ (p)',unit:'%',def:50,min:1,max:99,step:1,help:'ต้นฉบับใช้ 50'},
+    {id:'e',label:'ความคลาดเคลื่อน (e)',unit:'%',def:5,min:1,max:20,step:1,help:'ต้นฉบับใช้ 5'}],
+  compute(v,z){const p=pr(v.p),e=pr(v.e),x=z.a**2,n=x*v.N*p*(1-p)/(e*e*(v.N-1)+x*p*(1-p));
+    return {groups:one(n),formula:'n = χ²Np(1−p) / [e²(N−1) + χ²p(1−p)]',sub:`χ² = ${f(x,3)},  n = ${f(n)}`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรของ Krejcie และ Morgan (1970) จากประชากรทั้งหมด ${int(v.N)} คน กำหนดสัดส่วนของลักษณะที่สนใจเท่ากับ ${f(pr(v.p))} ความคลาดเคลื่อนร้อยละ ${v.e} และค่าไคสแควร์ที่ df = 1 ระดับความเชื่อมั่นร้อยละ ${r.conf} เท่ากับ ${f(z.a**2,3)} ${r.tail}`},
+
+// ===== comparative =====
+onemean:{cat:'comp',name:'เปรียบเทียบค่าเฉลี่ยกับค่ามาตรฐาน',hint:'one-sample t-test เช่น เปรียบเทียบค่าเฉลี่ย HbA1c ของผู้ป่วยกับเป้าหมาย 7%',power:true,
+  fields:[{id:'sd',label:'ส่วนเบี่ยงเบนมาตรฐาน (σ)',unit:'หน่วย',def:10,min:0.001,step:0.1,help:'จากงานวิจัยที่ผ่านมา'},
+    {id:'delta',label:'ความแตกต่างที่ต้องการตรวจพบ (Δ)',unit:'หน่วย',def:5,min:0.001,step:0.1,help:'ค่าเฉลี่ยที่คาด ลบ ค่ามาตรฐาน'}],
+  compute(v,z,s){const n=v.sd**2*(z.a+z.b)**2/v.delta**2,ex=exactOneT(v.delta/v.sd,s.alpha,s.tails,s.power);
+    return {groups:one(n),formula:'n = σ²(Zα + Zβ)² / Δ²',sub:`n = ${v.sd}² × (${f(z.a)} + ${f(z.b)})² / ${v.delta}² = ${f(n)}`,extra:`ตรวจสอบแบบ exact (noncentral t, วิธีเดียวกับ G*Power) ได้ ${ex.n} คน`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรการทดสอบค่าเฉลี่ยของประชากรหนึ่งกลุ่มเทียบกับค่ามาตรฐาน (Chow, Shao, & Wang, 2008) กำหนดส่วนเบี่ยงเบนมาตรฐานเท่ากับ ${v.sd} และความแตกต่างที่ต้องการตรวจพบเท่ากับ ${v.delta} ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ${r.stat} ${r.tail}`},
+
+oneprop:{cat:'comp',name:'เปรียบเทียบสัดส่วนกับค่ามาตรฐาน',hint:'เช่น ทดสอบว่าความครอบคลุมวัคซีนต่างจากเป้าหมายร้อยละ 90 หรือไม่',power:true,
+  fields:[{id:'p0',label:'สัดส่วนมาตรฐาน/เป้าหมาย (p₀)',unit:'%',def:90,min:0.1,max:99.9,step:0.1,help:'ค่าเป้าหมายหรือค่าอ้างอิง'},
+    {id:'p1',label:'สัดส่วนที่คาดไว้ (p₁)',unit:'%',def:80,min:0.1,max:99.9,step:0.1,help:'จากงานวิจัยที่ผ่านมา'}],
+  compute(v,z){const p0=pr(v.p0),p1=pr(v.p1),n=(z.a*Math.sqrt(p0*(1-p0))+z.b*Math.sqrt(p1*(1-p1)))**2/(p1-p0)**2;
+    return {groups:one(n),formula:'n = [Zα√(p₀(1−p₀)) + Zβ√(p₁(1−p₁))]² / (p₁ − p₀)²',sub:`n = [${f(z.a)}×${f(Math.sqrt(p0*(1-p0)),4)} + ${f(z.b)}×${f(Math.sqrt(p1*(1-p1)),4)}]² / ${f(p1-p0,3)}² = ${f(n)}`};},
+  warn:v=>v.p0===v.p1?'p₀ และ p₁ ต้องไม่เท่ากัน':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรการทดสอบสัดส่วนของประชากรหนึ่งกลุ่มเทียบกับค่ามาตรฐาน (Lwanga & Lemeshow, 1991) กำหนดสัดส่วนมาตรฐานเท่ากับร้อยละ ${v.p0} และสัดส่วนที่คาดไว้เท่ากับร้อยละ ${v.p1} ${REF} ${r.stat} ${r.tail}`},
+
+paired:{cat:'comp',name:'เปรียบเทียบก่อน-หลัง (Paired t-test)',hint:'กลุ่มเดียววัดซ้ำ',power:true,
+  fields:[{id:'sdd',label:'ส่วนเบี่ยงเบนมาตรฐานของผลต่าง (σd)',unit:'หน่วย',def:8,min:0.001,step:0.1,help:'ถ้าไม่ทราบ σd = √(σ₁² + σ₂² − 2ρσ₁σ₂)'},
+    {id:'delta',label:'ค่าเฉลี่ยของผลต่างที่คาดไว้ (Δ)',unit:'หน่วย',def:4,min:0.001,step:0.1,help:'หลัง ลบ ก่อน'}],
+  compute(v,z,s){const n=(z.a+z.b)**2*v.sdd**2/v.delta**2,ex=exactOneT(v.delta/v.sdd,s.alpha,s.tails,s.power);
+    return {groups:one(n),formula:'n = (Zα + Zβ)²σd² / Δ²',sub:`effect size = ${f(v.delta/v.sdd)},  n = (${f(z.a)} + ${f(z.b)})² × ${v.sdd}² / ${v.delta}² = ${f(n)}`,extra:`ตรวจสอบแบบ exact (noncentral t, วิธีเดียวกับ G*Power) ได้ ${ex.n} คน`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรการเปรียบเทียบค่าเฉลี่ยของกลุ่มตัวอย่างที่ไม่เป็นอิสระต่อกัน (paired samples) (Chow, Shao, & Wang, 2008) กำหนดส่วนเบี่ยงเบนมาตรฐานของผลต่างเท่ากับ ${v.sdd} และค่าเฉลี่ยของผลต่างก่อนและหลังเท่ากับ ${v.delta} ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ${r.stat} ${r.tail}`},
+
+ttestd:{cat:'comp',name:'t-test จากขนาดอิทธิพล (Cohen\'s d)',hint:'คำนวณแบบ exact ตรงกับ G*Power เหมาะเมื่อทราบเพียงขนาดอิทธิพล',power:true,exact:true,
+  fields:[{id:'test',label:'รูปแบบการทดสอบ',type:'select',def:'paired',options:[['paired','กลุ่มเดียว หรือก่อน-หลัง'],['two','สองกลุ่มอิสระ']],help:''},
+    {id:'d',label:'ขนาดอิทธิพล (Cohen\'s d)',unit:'',def:0.5,min:0.01,step:0.05,help:'0.2 เล็ก, 0.5 ปานกลาง, 0.8 ใหญ่ (Cohen, 1988)'},RATIO],
+  compute(v,z,s){if(v.test==='two'){const ex=exactTwoT(v.d,v.k,s.alpha,s.tails,s.power);
+      return {groups:v.k===1?eq(ex.n1,2):[{label:'กลุ่มที่ 1',n:ex.n1,mult:1},{label:'กลุ่มที่ 2',n:ex.n2,mult:1}],formula:'Noncentral t: δ = d√(n₁n₂/(n₁+n₂)), df = n₁ + n₂ − 2',sub:`power ที่ได้จริง = ${f(ex.pw,4)}`};}
+    const ex=exactOneT(v.d,s.alpha,s.tails,s.power);return {groups:one(ex.n),formula:'Noncentral t: δ = d√n, df = n − 1',sub:`power ที่ได้จริง = ${f(ex.pw,4)}`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการทดสอบค่าที (t-test) ${v.test==='two'?'แบบสองกลุ่มอิสระ':'แบบกลุ่มตัวอย่างไม่อิสระ'}ด้วยวิธีการแจกแจงแบบ noncentral t ตามแนวทางของโปรแกรม G*Power (Faul et al., 2007) กำหนดขนาดอิทธิพล (Cohen's d) เท่ากับ ${v.d} (Cohen, 1988) ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ${r.stat} ${r.tail}`},
+
+twomean:{cat:'comp',name:'เปรียบเทียบค่าเฉลี่ยสองกลุ่ม',hint:'งานวิจัยกึ่งทดลองสองกลุ่ม หรือ RCT ที่วัดผลเป็นตัวแปรต่อเนื่อง',power:true,
+  fields:[{id:'sd',label:'ส่วนเบี่ยงเบนมาตรฐานร่วม (σ)',unit:'หน่วย',def:10,min:0.001,step:0.1,help:'จากงานวิจัยที่ผ่านมา'},
+    {id:'delta',label:'ความแตกต่างของค่าเฉลี่ย (Δ)',unit:'หน่วย',def:5,min:0.001,step:0.1,help:'ค่าที่มีความหมายทางคลินิก'},RATIO],
+  compute(v,z,s){const n=(1+1/v.k)*v.sd**2*(z.a+z.b)**2/v.delta**2,ex=exactTwoT(v.delta/v.sd,v.k,s.alpha,s.tails,s.power);
+    return {groups:grp(v.k,n,'กลุ่มที่ 1','กลุ่มที่ 2'),formula:'n₁ = (1 + 1/k)σ²(Zα + Zβ)² / Δ²,  n₂ = k·n₁',sub:`effect size = ${f(v.delta/v.sd)},  n₁ = ${f(n)}`,extra:`ตรวจสอบแบบ exact (noncentral t, วิธีเดียวกับ G*Power) ได้ ${ex.n1}${v.k===1?' คนต่อกลุ่ม':` และ ${ex.n2} คน`}`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรการเปรียบเทียบค่าเฉลี่ยของประชากรสองกลุ่มที่เป็นอิสระต่อกัน (Chow, Shao, & Wang, 2008) กำหนดส่วนเบี่ยงเบนมาตรฐานเท่ากับ ${v.sd} และความแตกต่างของค่าเฉลี่ยระหว่างกลุ่มเท่ากับ ${v.delta} ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ${v.k!==1?`อัตราส่วนกลุ่มที่ 2 ต่อกลุ่มที่ 1 เท่ากับ ${v.k} `:''}${r.stat} ${r.tail}`},
+
+twoprop:{cat:'comp',name:'เปรียบเทียบสัดส่วนสองกลุ่ม',hint:'เช่น อัตราการหายหรือการปฏิบัติตัวถูกต้องของกลุ่มทดลองเทียบกับกลุ่มควบคุม',power:true,
+  fields:[{id:'p1',label:'สัดส่วนในกลุ่มที่ 1 (p₁)',unit:'%',def:60,min:0.1,max:99.9,step:0.1,help:'เช่น กลุ่มทดลอง'},
+    {id:'p2',label:'สัดส่วนในกลุ่มที่ 2 (p₂)',unit:'%',def:40,min:0.1,max:99.9,step:0.1,help:'เช่น กลุ่มควบคุม'},RATIO,METHOD],
+  compute(v,z){const r=propN(pr(v.p1),pr(v.p2),v.k,z,v.cc);
+    return {groups:grp(v.k,r.n,'กลุ่มที่ 1','กลุ่มที่ 2'),formula:r.formula,sub:`p̄ = ${f(r.pb,4)},  n₁ = ${f(r.n)}`,extra:r.extra};},
+  warn:v=>v.p1===v.p2?'p₁ และ p₂ ต้องไม่เท่ากัน':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างโดยใช้สูตรการเปรียบเทียบสัดส่วนของประชากรสองกลุ่มที่เป็นอิสระต่อกัน ตามวิธีของ ${MNAME[v.cc]} กำหนดสัดส่วนในกลุ่มที่ 1 เท่ากับร้อยละ ${v.p1} และกลุ่มที่ 2 เท่ากับร้อยละ ${v.p2} ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ${v.k!==1?`อัตราส่วนกลุ่มที่ 2 ต่อกลุ่มที่ 1 เท่ากับ ${v.k} `:''}${r.stat} ${r.tail}`},
+
+anova:{cat:'comp',name:'เปรียบเทียบค่าเฉลี่ยหลายกลุ่ม (One-way ANOVA)',hint:'คำนวณแบบ exact ด้วย noncentral F ตรงกับ G*Power',power:true,exact:true,noTail:true,
+  fields:[{id:'g',label:'จำนวนกลุ่ม (k)',unit:'กลุ่ม',def:3,min:2,max:20,step:1,help:''},
+    {id:'ef',label:'ขนาดอิทธิพล (Cohen\'s f)',unit:'',def:0.25,min:0.01,step:0.01,help:'0.10 เล็ก, 0.25 ปานกลาง, 0.40 ใหญ่ หรือ f = √(η²/(1−η²))'}],
+  compute(v,z,s){const g=Math.round(v.g),f2=v.ef**2;const pw=n=>{const N=n*g,cr=qF(1-s.alpha,g-1,N-g);return 1-pF(cr,g-1,N-g,f2*N);};const n=findN(2,pw,s.power);
+    return {groups:eq(n,g),formula:'Noncentral F: λ = f²N, df₁ = k − 1, df₂ = N − k',sub:`N = ${n*g},  power ที่ได้จริง = ${f(pw(n),4)}`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการวิเคราะห์ความแปรปรวนทางเดียว (one-way ANOVA) จำนวน ${Math.round(v.g)} กลุ่ม ด้วยการแจกแจงแบบ noncentral F ตามแนวทางของโปรแกรม G*Power (Faul et al., 2007) กำหนดขนาดอิทธิพล (Cohen's f) เท่ากับ ${v.ef} (Cohen, 1988) ${REF} ${r.stat} ${r.tail}`},
+
+niprop:{cat:'comp',name:'Non-inferiority สัดส่วนสองกลุ่ม',hint:'การทดลองทางคลินิกที่ต้องการแสดงว่าวิธีใหม่ไม่ด้อยกว่าวิธีมาตรฐาน (ผลลัพธ์ยิ่งสูงยิ่งดี)',power:true,oneSided:true,
+  fields:[{id:'pt',label:'สัดส่วนสำเร็จในกลุ่มวิธีใหม่ (pT)',unit:'%',def:85,min:0.1,max:99.9,step:0.1,help:''},
+    {id:'pc',label:'สัดส่วนสำเร็จในกลุ่มมาตรฐาน (pC)',unit:'%',def:85,min:0.1,max:99.9,step:0.1,help:''},
+    {id:'m',label:'ขอบเขตความไม่ด้อยกว่า (δ)',unit:'%',def:10,min:0.1,max:50,step:0.5,help:'ความต่างสูงสุดที่ยอมรับได้ทางคลินิก'}],
+  compute(v,z){const pt=pr(v.pt),pc=pr(v.pc),m=pr(v.m),n=(z.a+z.b)**2*(pt*(1-pt)+pc*(1-pc))/(pt-pc+m)**2;
+    return {groups:eq(n,2),formula:'n/กลุ่ม = (Zα + Zβ)²[pT(1−pT) + pC(1−pC)] / (pT − pC + δ)²',sub:`n = (${f(z.a)} + ${f(z.b)})² × ${f(pt*(1-pt)+pc*(1-pc),4)} / ${f(pt-pc+m,3)}² = ${f(n)}`};},
+  warn:v=>v.pt-v.pc+v.m<=0?'pT − pC + δ ต้องมากกว่า 0':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการทดสอบความไม่ด้อยกว่า (non-inferiority) ของสัดส่วนสองกลุ่ม (Chow, Shao, & Wang, 2008) กำหนดสัดส่วนความสำเร็จของกลุ่มวิธีใหม่และกลุ่มมาตรฐานเท่ากับร้อยละ ${v.pt} และ ${v.pc} ตามลำดับ ${REF} ขอบเขตความไม่ด้อยกว่าร้อยละ ${v.m} ${r.stat} ${r.tail}`},
+
+nimean:{cat:'comp',name:'Non-inferiority ค่าเฉลี่ยสองกลุ่ม',hint:'แสดงว่าวิธีใหม่ไม่ด้อยกว่าวิธีมาตรฐาน เมื่อผลลัพธ์เป็นตัวแปรต่อเนื่อง',power:true,oneSided:true,
+  fields:[{id:'sd',label:'ส่วนเบี่ยงเบนมาตรฐาน (σ)',unit:'หน่วย',def:10,min:0.001,step:0.1,help:''},
+    {id:'diff',label:'ความแตกต่างจริงที่คาดไว้ (μT − μC)',unit:'หน่วย',def:0,step:0.1,help:'มักใช้ 0'},
+    {id:'m',label:'ขอบเขตความไม่ด้อยกว่า (δ)',unit:'หน่วย',def:4,min:0.001,step:0.1,help:''}],
+  compute(v,z){const n=2*v.sd**2*(z.a+z.b)**2/(v.diff+v.m)**2;return {groups:eq(n,2),formula:'n/กลุ่ม = 2σ²(Zα + Zβ)² / (μT − μC + δ)²',sub:`n = 2 × ${v.sd}² × (${f(z.a)} + ${f(z.b)})² / ${f(v.diff+v.m,3)}² = ${f(n)}`};},
+  warn:v=>v.diff+v.m<=0?'(μT − μC) + δ ต้องมากกว่า 0':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการทดสอบความไม่ด้อยกว่า (non-inferiority) ของค่าเฉลี่ยสองกลุ่ม (Chow, Shao, & Wang, 2008) กำหนดส่วนเบี่ยงเบนมาตรฐานเท่ากับ ${v.sd} ความแตกต่างที่คาดไว้เท่ากับ ${v.diff} ${REF} และขอบเขตความไม่ด้อยกว่าเท่ากับ ${v.m} ${r.stat} ${r.tail}`},
+
+// ===== regression =====
+corr:{cat:'reg',name:'สหสัมพันธ์ (Correlation)',hint:'เช่น ความสัมพันธ์ระหว่างความรอบรู้ด้านสุขภาพกับพฤติกรรมการดูแลตนเอง',power:true,
+  fields:[{id:'r',label:'สัมประสิทธิ์สหสัมพันธ์ที่คาดไว้ (r)',unit:'',def:0.3,min:-0.99,max:0.99,step:0.01,help:'0.1 ต่ำ, 0.3 ปานกลาง, 0.5 สูง (Cohen, 1988)'}],
+  compute(v,z){const C=0.5*Math.log((1+v.r)/(1-v.r)),n=((z.a+z.b)/C)**2+3;
+    return {groups:one(n),formula:'n = [(Zα + Zβ) / C]² + 3,  C = ½ ln[(1+r)/(1−r)]',sub:`C = ${f(C,4)},  n = ${f(n)}`};},
+  warn:v=>(v.r===0||Math.abs(v.r)>=1)?'ค่า r ต้องอยู่ระหว่าง −0.99 ถึง 0.99 และไม่เท่ากับ 0':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการวิเคราะห์สหสัมพันธ์ (Hulley et al., 2013) กำหนดค่าสัมประสิทธิ์สหสัมพันธ์ที่คาดไว้เท่ากับ ${v.r} ซึ่งอ้างอิงจากการศึกษาที่ผ่านมา ${REF} ${r.stat} ${r.tail}`},
+
+linreg:{cat:'reg',name:'Multiple Linear Regression',hint:'ทดสอบว่าตัวแปรต้นทั้งหมดร่วมกันอธิบายตัวแปรตามได้ (R² ≠ 0) คำนวณแบบ exact ตรงกับ G*Power',power:true,exact:true,noTail:true,
+  fields:[{id:'r2',label:'R² ที่คาดไว้',unit:'',def:0.13,min:0.001,max:0.95,step:0.01,help:'Cohen: 0.02 เล็ก, 0.13 ปานกลาง, 0.26 ใหญ่'},
+    {id:'u',label:'จำนวนตัวแปรต้น (predictors)',unit:'ตัว',def:5,min:1,max:100,step:1,help:'นับตัวแปรหุ่น (dummy) แยกแต่ละตัว'}],
+  compute(v,z,s){const u=Math.round(v.u),f2=v.r2/(1-v.r2),r=fTestN(f2,u,u+1,u+3,s.alpha,s.power);
+    return {groups:one(r.N),formula:'Noncentral F: f² = R²/(1−R²), λ = f²N, df₁ = u, df₂ = N − u − 1',sub:`f² = ${f(f2,4)},  power ที่ได้จริง = ${f(r.pw,4)}`,extra:`เปรียบเทียบกฎของ Green (1991): ทดสอบโมเดลรวม N ≥ 50 + 8u = ${50+8*u}, ทดสอบตัวแปรรายตัว N ≥ 104 + u = ${104+u}`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการวิเคราะห์การถดถอยเชิงเส้นพหุคูณ ด้วยการแจกแจงแบบ noncentral F ตามแนวทางของโปรแกรม G*Power (Faul et al., 2009) กำหนดตัวแปรต้นจำนวน ${Math.round(v.u)} ตัว ค่า R² ที่คาดไว้เท่ากับ ${v.r2} (effect size f² = ${f(v.r2/(1-v.r2),3)}) ${REF} ${r.stat} ${r.tail}`},
+
+linreginc:{cat:'reg',name:'Linear Regression: R² ที่เพิ่มขึ้น',hint:'Hierarchical regression หรือทดสอบตัวแปรกลุ่มหนึ่ง/ตัวแปรกำกับ (moderator) หลังควบคุมตัวแปรอื่น',power:true,exact:true,noTail:true,
+  fields:[{id:'dr2',label:'R² ที่เพิ่มขึ้น (ΔR²)',unit:'',def:0.05,min:0.001,max:0.9,step:0.01,help:'จากตัวแปรที่ต้องการทดสอบ'},
+    {id:'r2f',label:'R² ของโมเดลเต็ม',unit:'',def:0.3,min:0.001,max:0.95,step:0.01,help:'รวมตัวแปรทั้งหมด'},
+    {id:'u',label:'จำนวนตัวแปรต้นทั้งหมด',unit:'ตัว',def:6,min:1,max:100,step:1,help:''},
+    {id:'q',label:'จำนวนตัวแปรที่ทดสอบ',unit:'ตัว',def:2,min:1,max:100,step:1,help:'ต้องไม่เกินจำนวนทั้งหมด'}],
+  compute(v,z,s){const u=Math.round(v.u),q=Math.round(v.q),f2=v.dr2/(1-v.r2f),r=fTestN(f2,q,u+1,u+3,s.alpha,s.power);
+    return {groups:one(r.N),formula:'Noncentral F: f² = ΔR²/(1 − R²full), df₁ = q, df₂ = N − u − 1',sub:`f² = ${f(f2,4)},  power ที่ได้จริง = ${f(r.pw,4)}`};},
+  warn:v=>(v.q>v.u?'จำนวนตัวแปรที่ทดสอบต้องไม่เกินจำนวนทั้งหมด':(v.dr2>=v.r2f?'ΔR² ต้องน้อยกว่า R² ของโมเดลเต็ม':null)),
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการทดสอบ R² ที่เพิ่มขึ้นในการวิเคราะห์การถดถอยเชิงเส้นพหุคูณ ตามแนวทางของโปรแกรม G*Power (Faul et al., 2009) กำหนดตัวแปรต้นทั้งหมด ${Math.round(v.u)} ตัว ทดสอบตัวแปร ${Math.round(v.q)} ตัว ค่า R² ที่เพิ่มขึ้นเท่ากับ ${v.dr2} และ R² ของโมเดลเต็มเท่ากับ ${v.r2f} (f² = ${f(v.dr2/(1-v.r2f),3)}) ${REF} ${r.stat} ${r.tail}`},
+
+logitc:{cat:'reg',name:'Logistic Regression: ตัวแปรต้นต่อเนื่อง',hint:'สูตรของ Hsieh et al. (1998) เช่น อายุ ดัชนีมวลกาย คะแนนความรู้ ที่สัมพันธ์กับผลลัพธ์แบบสองค่า',power:true,
+  fields:[{id:'P',label:'สัดส่วนการเกิดเหตุการณ์ (P)',unit:'%',def:30,min:0.1,max:99.9,step:0.1,help:'เช่น ร้อยละผู้ป่วยที่ควบคุมน้ำตาลไม่ได้'},
+    {id:'or',label:'Odds ratio ต่อ 1 SD ของตัวแปรต้น',unit:'',def:1.5,min:0.01,step:0.01,help:'จากงานวิจัยที่ผ่านมา'},
+    {id:'rho',label:'R² ระหว่างตัวแปรต้นหลักกับตัวแปรอื่น (ρ²)',unit:'',def:0.2,min:0,max:0.95,step:0.01,help:'ใส่ 0 ถ้าเป็น simple logistic regression'}],
+  compute(v,z){const P=pr(v.P),b=Math.log(v.or),n1=(z.a+z.b)**2/(P*(1-P)*b*b),n=n1/(1-v.rho);
+    return {groups:one(n),formula:'n = (Zα + Zβ)² / [P(1−P)β²] ÷ (1 − ρ²),  β = ln(OR)',sub:`β = ${f(b,4)},  n₁ = ${f(n1)}  →  n = ${f(n)}`};},
+  warn:v=>v.or===1?'OR ต้องไม่เท่ากับ 1':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการวิเคราะห์การถดถอยโลจิสติกพหุคูณ กรณีตัวแปรต้นหลักเป็นตัวแปรต่อเนื่อง โดยใช้สูตรของ Hsieh, Bloch, และ Larsen (1998) กำหนดสัดส่วนการเกิดเหตุการณ์เท่ากับร้อยละ ${v.P} และค่า odds ratio ต่อหนึ่งส่วนเบี่ยงเบนมาตรฐานเท่ากับ ${v.or} ${REF} ${r.stat} ${v.rho>0?`และปรับด้วยค่าสัมประสิทธิ์การตัดสินใจระหว่างตัวแปรต้นหลักกับตัวแปรต้นอื่น (ρ²) เท่ากับ ${v.rho} `:''}${r.tail}`},
+
+logitb:{cat:'reg',name:'Logistic Regression: ตัวแปรต้นสองค่า',hint:'สูตรของ Hsieh et al. (1998) เช่น เพศ การสูบบุหรี่ การมีโรคประจำตัว',power:true,
+  fields:[{id:'p0',label:'สัดส่วนการเกิดเหตุการณ์ในกลุ่ม X = 0',unit:'%',def:20,min:0.1,max:99.9,step:0.1,help:'เช่น กลุ่มไม่สูบบุหรี่'},
+    {id:'or',label:'Odds ratio ที่คาดไว้',unit:'',def:2,min:0.01,step:0.01,help:'จากงานวิจัยที่ผ่านมา'},
+    {id:'B',label:'สัดส่วนของผู้ที่มี X = 1 (B)',unit:'%',def:30,min:1,max:99,step:1,help:'เช่น ร้อยละผู้สูบบุหรี่ในประชากร'},
+    {id:'rho',label:'R² ระหว่างตัวแปรต้นหลักกับตัวแปรอื่น (ρ²)',unit:'',def:0.1,min:0,max:0.95,step:0.01,help:'ใส่ 0 ถ้าเป็น simple logistic regression'}],
+  compute(v,z){const P1=pr(v.p0),B=pr(v.B),P2=v.or*P1/(1-P1+v.or*P1),P=(1-B)*P1+B*P2;
+    const n1=(z.a*Math.sqrt(P*(1-P)/B)+z.b*Math.sqrt(P1*(1-P1)+P2*(1-P2)*(1-B)/B))**2/((P1-P2)**2*(1-B)),n=n1/(1-v.rho);
+    return {groups:one(n),formula:'n = [Zα√(P(1−P)/B) + Zβ√(P₁Q₁ + P₂Q₂(1−B)/B)]² / [(P₁−P₂)²(1−B)] ÷ (1 − ρ²)',sub:`P₂ = ${f(P2,4)},  P = ${f(P,4)},  n₁ = ${f(n1)}  →  n = ${f(n)}`};},
+  warn:v=>v.or===1?'OR ต้องไม่เท่ากับ 1':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการวิเคราะห์การถดถอยโลจิสติกพหุคูณ กรณีตัวแปรต้นหลักเป็นตัวแปรสองค่า โดยใช้สูตรของ Hsieh, Bloch, และ Larsen (1998) กำหนดสัดส่วนการเกิดเหตุการณ์ในกลุ่มที่ไม่มีปัจจัยเท่ากับร้อยละ ${v.p0} ค่า odds ratio เท่ากับ ${v.or} และสัดส่วนของผู้ที่มีปัจจัยเท่ากับร้อยละ ${v.B} ${REF} ${r.stat} ${v.rho>0?`และปรับด้วยค่า ρ² เท่ากับ ${v.rho} `:''}${r.tail}`},
+
+epv:{cat:'reg',name:'จำนวนเหตุการณ์ต่อตัวแปร (EPV)',hint:'กฎทั่วไปสำหรับ logistic และ Cox regression (Peduzzi et al., 1996)',noAlpha:true,
+  fields:[{id:'k',label:'จำนวนตัวแปรต้นในโมเดล',unit:'ตัว',def:8,min:1,max:100,step:1,help:'นับตัวแปรหุ่นแยกแต่ละตัว'},
+    {id:'P',label:'สัดส่วนการเกิดเหตุการณ์',unit:'%',def:25,min:0.1,max:99.9,step:0.1,help:'ใช้กลุ่มที่น้อยกว่าระหว่างเกิดกับไม่เกิด'},
+    {id:'e',label:'จำนวนเหตุการณ์ต่อตัวแปร',type:'select',def:'10',options:[['10','10 (Peduzzi et al., 1996)'],['15','15'],['20','20 (อนุรักษ์นิยม)']],help:''}],
+  compute(v){const e=+v.e,P=pr(Math.min(v.P,100-v.P)),n=e*v.k/P;return {groups:one(n),formula:'n = (EPV × k) / P',sub:`เหตุการณ์ที่ต้องการ = ${e} × ${Math.round(v.k)} = ${e*Math.round(v.k)},  n = ${f(n)}`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้กำหนดขนาดตัวอย่างตามหลักจำนวนเหตุการณ์ต่อตัวแปร (events per variable) อย่างน้อย ${v.e} เหตุการณ์ต่อตัวแปรต้นหนึ่งตัว (Peduzzi et al., 1996) โดยมีตัวแปรต้น ${Math.round(v.k)} ตัว และสัดส่วนการเกิดเหตุการณ์ร้อยละ ${v.P} ${REF} ${r.tail}`},
+
+// ===== epidemiology =====
+cc:{cat:'epi',name:'Case-control (ไม่จับคู่)',hint:'เปรียบเทียบการสัมผัสปัจจัยเสี่ยงระหว่างกลุ่มผู้ป่วยกับกลุ่มควบคุม',power:true,
+  fields:[{id:'p0',label:'สัดส่วนการสัมผัสปัจจัยในกลุ่มควบคุม (p₀)',unit:'%',def:30,min:0.1,max:99.9,step:0.1,help:'จากงานวิจัยที่ผ่านมา'},
+    {id:'or',label:'Odds ratio ที่ต้องการตรวจพบ',unit:'',def:2,min:0.01,step:0.01,help:''},
+    {id:'k',label:'จำนวนกลุ่มควบคุมต่อผู้ป่วย 1 ราย',unit:'ราย',def:1,min:1,max:10,step:1,help:'เกิน 4 ให้ประโยชน์เพิ่มน้อยมาก'},METHOD],
+  compute(v,z){const p0=pr(v.p0),p1=v.or*p0/(1+p0*(v.or-1)),r=propN(p1,p0,v.k,z,v.cc);
+    return {groups:grp(v.k,r.n,'กลุ่มผู้ป่วย','กลุ่มควบคุม'),formula:r.formula,sub:`p₁ = OR·p₀/[1 + p₀(OR−1)] = ${f(p1,4)},  n_case = ${f(r.n)}`,extra:r.extra};},
+  warn:v=>v.or===1?'OR ต้องไม่เท่ากับ 1':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้เป็นการศึกษาแบบ case-control คำนวณขนาดตัวอย่างตามวิธีของ ${MNAME[v.cc]} กำหนดสัดส่วนการสัมผัสปัจจัยในกลุ่มควบคุมเท่ากับร้อยละ ${v.p0} ค่า odds ratio ที่ต้องการตรวจพบเท่ากับ ${v.or} ${REF} อัตราส่วนกลุ่มผู้ป่วยต่อกลุ่มควบคุม 1:${v.k} ${r.stat} ${r.tail}`},
+
+mcc:{cat:'epi',name:'Case-control แบบจับคู่ 1:1',hint:'จับคู่ผู้ป่วยกับกลุ่มควบคุมตามอายุ เพศ หรือปัจจัยอื่น (Schlesselman, 1982)',power:true,
+  fields:[{id:'p0',label:'สัดส่วนการสัมผัสปัจจัยในกลุ่มควบคุม (p₀)',unit:'%',def:30,min:0.1,max:99.9,step:0.1,help:''},
+    {id:'or',label:'Odds ratio ที่ต้องการตรวจพบ',unit:'',def:2,min:0.01,step:0.01,help:''}],
+  compute(v,z){const p0=pr(v.p0),p1=v.or*p0/(1+p0*(v.or-1)),P=v.or/(1+v.or),m=(z.a+2*z.b*Math.sqrt(P*(1-P)))**2/(2*P-1)**2,pd=p0*(1-p1)+p1*(1-p0),M=m/pd;
+    return {groups:eq(M,2,'คู่'),formula:'m = [Zα + 2Zβ√(P(1−P))]² / (2P − 1)²,  P = OR/(1+OR),  คู่ทั้งหมด = m / p_d',sub:`คู่ที่ไม่ตรงกัน m = ${f(m)},  p_d = ${f(pd,4)},  คู่ทั้งหมด = ${f(M)}`};},
+  warn:v=>v.or===1?'OR ต้องไม่เท่ากับ 1':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้เป็นการศึกษาแบบ case-control ชนิดจับคู่ 1:1 คำนวณขนาดตัวอย่างโดยใช้สูตรของ Schlesselman (1982) กำหนดสัดส่วนการสัมผัสปัจจัยในกลุ่มควบคุมเท่ากับร้อยละ ${v.p0} และค่า odds ratio ที่ต้องการตรวจพบเท่ากับ ${v.or} ${REF} ${r.stat} ${r.tail}`},
+
+cohort:{cat:'epi',name:'Cohort / RCT (Risk ratio)',hint:'ติดตามกลุ่มสัมผัสและไม่สัมผัสปัจจัย เปรียบเทียบอุบัติการณ์สะสม',power:true,
+  fields:[{id:'p0',label:'อุบัติการณ์ในกลุ่มไม่สัมผัส (p₀)',unit:'%',def:10,min:0.1,max:99.9,step:0.1,help:''},
+    {id:'rr',label:'Risk ratio ที่ต้องการตรวจพบ',unit:'',def:2,min:0.01,step:0.01,help:''},
+    {id:'k',label:'อัตราส่วนกลุ่มไม่สัมผัสต่อกลุ่มสัมผัส',unit:'เท่า',def:1,min:0.1,max:10,step:0.5,help:''},METHOD],
+  compute(v,z){const p0=pr(v.p0),p1=v.rr*p0,r=propN(p1,p0,v.k,z,v.cc);
+    return {groups:grp(v.k,r.n,'กลุ่มสัมผัส','กลุ่มไม่สัมผัส'),formula:r.formula,sub:`p₁ = RR × p₀ = ${f(p1,4)},  n₁ = ${f(r.n)}`,extra:r.extra};},
+  warn:v=>(v.rr===1?'RR ต้องไม่เท่ากับ 1':(v.rr*v.p0>=100?'RR × p₀ ต้องน้อยกว่า 100%':null)),
+  para:(v,z,r)=>`การศึกษาครั้งนี้เป็นการศึกษาแบบติดตามไปข้างหน้า คำนวณขนาดตัวอย่างตามวิธีของ ${MNAME[v.cc]} กำหนดอุบัติการณ์ในกลุ่มไม่สัมผัสปัจจัยเท่ากับร้อยละ ${v.p0} และค่า risk ratio ที่ต้องการตรวจพบเท่ากับ ${v.rr} ${REF} ${v.k!==1?`อัตราส่วนกลุ่มไม่สัมผัสต่อกลุ่มสัมผัสเท่ากับ ${v.k} `:''}${r.stat} ${r.tail}`},
+
+surv:{cat:'epi',name:'Survival analysis (Log-rank / Cox)',hint:'เปรียบเทียบเวลาจนเกิดเหตุการณ์ระหว่างสองกลุ่ม (Schoenfeld, 1983)',power:true,
+  fields:[{id:'hr',label:'Hazard ratio ที่ต้องการตรวจพบ',unit:'',def:0.6,min:0.01,step:0.01,help:''},
+    {id:'pi',label:'สัดส่วนผู้อยู่ในกลุ่มที่ 1',unit:'%',def:50,min:5,max:95,step:5,help:'50 หมายถึงสองกลุ่มเท่ากัน'},
+    {id:'pe',label:'สัดส่วนที่คาดว่าจะเกิดเหตุการณ์ตลอดการติดตาม',unit:'%',def:40,min:1,max:100,step:1,help:'รวมทั้งสองกลุ่ม'}],
+  compute(v,z){const pi=pr(v.pi),b=Math.log(v.hr),d=(z.a+z.b)**2/(pi*(1-pi)*b*b),n=d/pr(v.pe);
+    return {groups:[{label:'กลุ่มที่ 1',n:n*pi,mult:1},{label:'กลุ่มที่ 2',n:n*(1-pi),mult:1}],formula:'d = (Zα + Zβ)² / [π(1−π)(ln HR)²],  n = d / P(event)',sub:`ln HR = ${f(b,4)},  จำนวนเหตุการณ์ที่ต้องการ d = ${Math.ceil(d)},  n = ${f(n)}`};},
+  warn:v=>v.hr===1?'HR ต้องไม่เท่ากับ 1':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการวิเคราะห์การรอดชีพโดยใช้สูตรของ Schoenfeld (1983) กำหนดค่า hazard ratio เท่ากับ ${v.hr} สัดส่วนการจัดกลุ่มร้อยละ ${v.pi} ต่อ ${100-v.pi} และสัดส่วนการเกิดเหตุการณ์ตลอดการติดตามร้อยละ ${v.pe} ${REF} ${r.stat} ${r.tail}`},
+
+rates:{cat:'epi',name:'เปรียบเทียบอัตราอุบัติการณ์ (Incidence rate)',hint:'เมื่อผลลัพธ์เป็นอัตราต่อคน-เวลา เช่น อัตราการเกิดโรคต่อ 1,000 คน-ปี',power:true,unit:'คน-ปี',
+  fields:[{id:'r0',label:'อัตราในกลุ่มที่ 1 ต่อ 1,000 คน-ปี',unit:'',def:20,min:0.01,step:0.1,help:''},
+    {id:'r1',label:'อัตราในกลุ่มที่ 2 ต่อ 1,000 คน-ปี',unit:'',def:10,min:0.01,step:0.1,help:''}],
+  compute(v,z){const l0=v.r0/1000,l1=v.r1/1000,n=(z.a+z.b)**2*(l0+l1)/(l0-l1)**2;
+    return {groups:eq(n,2),formula:'คน-ปี/กลุ่ม = (Zα + Zβ)²(λ₁ + λ₂) / (λ₁ − λ₂)²',sub:`n = ${f(n)} คน-ปี ต่อกลุ่ม`};},
+  warn:v=>v.r0===v.r1?'อัตราทั้งสองกลุ่มต้องไม่เท่ากัน':null,
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการเปรียบเทียบอัตราอุบัติการณ์ของสองกลุ่ม (Smith & Morrow, 1996) กำหนดอัตราอุบัติการณ์เท่ากับ ${v.r0} และ ${v.r1} ต่อ 1,000 คน-ปี ${REF} ${r.stat} ${r.tail}`},
+
+// ===== SEM =====
+semr:{cat:'sem',name:'SEM / CFA ด้วยอำนาจการทดสอบ RMSEA',hint:'วิธีของ MacCallum, Browne, และ Sugawara (1996) คำนวณแบบ exact ด้วย noncentral χ²',power:true,exact:true,noTail:true,
+  fields:[{id:'df',label:'องศาอิสระของโมเดล (df)',unit:'',def:50,min:1,max:5000,step:1,help:'df = p(p+1)/2 − จำนวนพารามิเตอร์อิสระ, p = จำนวนตัวแปรสังเกตได้'},
+    {id:'test',label:'สมมติฐานที่ทดสอบ',type:'select',def:'close',options:[['close','Close fit (ε₀ = 0.05, εₐ = 0.08)'],['notclose','Not-close fit (ε₀ = 0.05, εₐ = 0.01)'],['exact','Exact fit (ε₀ = 0, εₐ = 0.05)']],help:'Close fit เป็นที่นิยมที่สุด'}],
+  compute(v,z,s){const E={close:[0.05,0.08],notclose:[0.05,0.01],exact:[0,0.05]}[v.test],r=semN(Math.round(v.df),E[0],E[1],s.alpha,s.power);
+    return {groups:one(r.N),formula:'λ = (N − 1)·df·ε²,  ทดสอบด้วย noncentral χ²',sub:`ε₀ = ${E[0]},  εₐ = ${E[1]},  power ที่ได้จริง = ${f(r.pw,4)}`};},
+  para:(v,z,r)=>{const E={close:'close fit (ε₀ = 0.05, εₐ = 0.08)',notclose:'not-close fit (ε₀ = 0.05, εₐ = 0.01)',exact:'exact fit (ε₀ = 0, εₐ = 0.05)'}[v.test];
+    return `การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการวิเคราะห์โมเดลสมการโครงสร้างด้วยอำนาจการทดสอบของค่า RMSEA ตามวิธีของ MacCallum, Browne, และ Sugawara (1996) แบบ ${E} โมเดลมีองศาอิสระเท่ากับ ${Math.round(v.df)} ${r.stat} ${r.tail}`;}},
+
+semq:{cat:'sem',name:'SEM / CFA ด้วยอัตราส่วนต่อพารามิเตอร์',hint:'กฎ N:q ของ Jackson (2003) และ Kline (2016) นิยมในวิทยานิพนธ์ไทย',noAlpha:true,
+  fields:[{id:'q',label:'จำนวนพารามิเตอร์อิสระ (q)',unit:'ตัว',def:30,min:1,max:1000,step:1,help:'factor loadings + ความแปรปรวนคลาดเคลื่อน + สัมประสิทธิ์เส้นทาง + ความแปรปรวนร่วม'},
+    {id:'ratio',label:'อัตราส่วนตัวอย่างต่อพารามิเตอร์',type:'select',def:'20',options:[['5','5:1 (ขั้นต่ำ)'],['10','10:1 (ยอมรับได้)'],['20','20:1 (แนะนำ, Jackson 2003)']],help:''},
+    {id:'min',label:'ขนาดตัวอย่างขั้นต่ำ',unit:'คน',def:200,min:0,step:10,help:'Kline (2016) แนะนำอย่างน้อย 200'}],
+  compute(v){const r=+v.ratio,n=Math.max(v.q*r,v.min);return {groups:one(n),formula:'n = max(q × อัตราส่วน, ขั้นต่ำ)',sub:`${Math.round(v.q)} × ${r} = ${Math.round(v.q)*r},  ขั้นต่ำ = ${v.min}`,extra:`เปรียบเทียบ: 5:1 = ${Math.round(v.q)*5}, 10:1 = ${Math.round(v.q)*10}, 20:1 = ${Math.round(v.q)*20} คน`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้กำหนดขนาดตัวอย่างสำหรับการวิเคราะห์โมเดลสมการโครงสร้างตามเกณฑ์อัตราส่วนกลุ่มตัวอย่างต่อพารามิเตอร์อิสระ ${v.ratio}:1 (Jackson, 2003) โมเดลมีพารามิเตอร์อิสระ ${Math.round(v.q)} ตัว${v.min>0?` และไม่น้อยกว่า ${v.min} คน (Kline, 2016)`:''} ${r.tail}`},
+
+// ===== diagnostic =====
+diag:{cat:'diag',name:'ความไวและความจำเพาะ',hint:'ประเมินความแม่นยำของเครื่องมือคัดกรองหรือการทดสอบวินิจฉัย (Buderer, 1996)',noTail:true,
+  fields:[{id:'se',label:'ความไวที่คาดไว้ (Sensitivity)',unit:'%',def:85,min:1,max:99.9,step:0.1,help:''},
+    {id:'sp',label:'ความจำเพาะที่คาดไว้ (Specificity)',unit:'%',def:80,min:1,max:99.9,step:0.1,help:''},
+    {id:'prev',label:'ความชุกของโรคในกลุ่มที่ศึกษา',unit:'%',def:20,min:0.1,max:99.9,step:0.1,help:''},
+    {id:'d',label:'ความคลาดเคลื่อนที่ยอมรับได้ (d)',unit:'%',def:5,min:0.5,max:30,step:0.5,help:''}],
+  compute(v,z){const se=pr(v.se),sp=pr(v.sp),pv=pr(v.prev),d=pr(v.d),a=z.a**2*se*(1-se)/d**2/pv,b=z.a**2*sp*(1-sp)/d**2/(1-pv),n=Math.max(a,b);
+    return {groups:one(n),formula:'n_Se = Z²Se(1−Se) / (d²·Prev),  n_Sp = Z²Sp(1−Sp) / [d²(1−Prev)]',sub:`n_Se = ${f(a)},  n_Sp = ${f(b)}  →  ใช้ค่าที่มากกว่า`};},
+  para:(v,z,r)=>`การศึกษาครั้งนี้คำนวณขนาดตัวอย่างสำหรับการประเมินความไวและความจำเพาะของการทดสอบโดยใช้สูตรของ Buderer (1996) กำหนดความไวที่คาดไว้ร้อยละ ${v.se} ความจำเพาะร้อยละ ${v.sp} ความชุกของโรคร้อยละ ${v.prev} ${REF} ความคลาดเคลื่อนที่ยอมรับได้ร้อยละ ${v.d} ${r.stat} ${r.tail}`}
+};
+// ---------- names, standard terminology, presets ----------
+CATS.splice(0,CATS.length,
+  ['desc','การประมาณค่า','Estimation'],
+  ['comp','การเปรียบเทียบกลุ่ม','Group comparison'],
+  ['reg','ความสัมพันธ์และการถดถอย','Correlation & regression'],
+  ['epi','การศึกษาทางระบาดวิทยา','Epidemiological studies'],
+  ['sem','โมเดลสมการโครงสร้าง','SEM & CFA'],
+  ['diag','ความแม่นยำของการวินิจฉัย','Diagnostic accuracy']);
+const META={
+  prop:['ประมาณค่าสัดส่วน / ความชุก','Estimating a proportion'],
+  mean:['ประมาณค่าเฉลี่ย','Estimating a mean'],
+  yamane:['สูตรของ Yamane','Finite population, Yamane (1967)','การสำรวจเชิงพรรณนาที่ทราบขนาดประชากร เช่น การสำรวจความคิดเห็นหรือความพึงพอใจ'],
+  krejcie:['สูตรของ Krejcie และ Morgan','Finite population, Krejcie & Morgan (1970)','การสำรวจที่ทราบขนาดประชากร เป็นที่มาของตารางสำเร็จรูป Krejcie และ Morgan'],
+  onemean:['ค่าเฉลี่ยหนึ่งกลุ่มเทียบค่ามาตรฐาน','One-sample t-test'],
+  oneprop:['สัดส่วนหนึ่งกลุ่มเทียบค่ามาตรฐาน','One-sample proportion test'],
+  paired:['ค่าเฉลี่ยก่อน-หลังในกลุ่มเดียว','Paired t-test','วัดซ้ำในกลุ่มเดียวกัน เช่น การศึกษากึ่งทดลองแบบกลุ่มเดียววัดก่อนและหลัง'],
+  ttestd:['t-test จากขนาดอิทธิพล',"Cohen's d, exact method",'ใช้เมื่อทราบเพียงขนาดอิทธิพล คำนวณแบบ exact ด้วย noncentral t'],
+  twomean:['ค่าเฉลี่ยสองกลุ่มอิสระ','Two-sample t-test'],
+  twoprop:['สัดส่วนสองกลุ่มอิสระ','Two independent proportions'],
+  anova:['ค่าเฉลี่ยตั้งแต่สามกลุ่มขึ้นไป','One-way ANOVA','คำนวณแบบ exact ด้วย noncentral F'],
+  niprop:['ความไม่ด้อยกว่า: สัดส่วน','Non-inferiority, two proportions'],
+  nimean:['ความไม่ด้อยกว่า: ค่าเฉลี่ย','Non-inferiority, two means'],
+  corr:['สหสัมพันธ์','Pearson correlation'],
+  linreg:['การถดถอยเชิงเส้นพหุคูณ','Multiple linear regression'],
+  linreginc:['การถดถอยเชิงเส้น: R² ที่เพิ่มขึ้น','Hierarchical regression (ΔR²)'],
+  logitc:['การถดถอยโลจิสติก: ตัวแปรต้นต่อเนื่อง','Logistic regression, continuous predictor'],
+  logitb:['การถดถอยโลจิสติก: ตัวแปรต้นสองค่า','Logistic regression, binary predictor'],
+  epv:['จำนวนเหตุการณ์ต่อตัวแปร','Events per variable (EPV)'],
+  cc:['Case-control ไม่จับคู่','Unmatched case-control'],
+  mcc:['Case-control จับคู่ 1:1','Matched case-control (1:1)'],
+  cohort:['Cohort และ RCT','Cohort study / RCT (risk ratio)'],
+  surv:['การวิเคราะห์การรอดชีพ','Survival analysis (log-rank / Cox)'],
+  rates:['เปรียบเทียบอัตราอุบัติการณ์','Two incidence rates'],
+  semr:['SEM / CFA: อำนาจการทดสอบ RMSEA','RMSEA power, MacCallum et al. (1996)'],
+  semq:['SEM / CFA: อัตราส่วนต่อพารามิเตอร์','N:q ratio rule','กฎอัตราส่วนกลุ่มตัวอย่างต่อพารามิเตอร์อิสระ ของ Jackson (2003) และ Kline (2016)'],
+  diag:['ความไวและความจำเพาะ','Sensitivity & specificity']
+};
+for(const [k,m] of Object.entries(META)){CALCS[k].name=m[0];CALCS[k].en=m[1];if(m[2])CALCS[k].hint=m[2];}
+const PRESETS={
+  'prop.p':[['ไม่ทราบค่า',50]],
+  'krejcie.p':[['ไม่ทราบค่า',50]],
+  'ttestd.d':[['เล็ก',0.2],['ปานกลาง',0.5],['ใหญ่',0.8]],
+  'anova.ef':[['เล็ก',0.10],['ปานกลาง',0.25],['ใหญ่',0.40]],
+  'corr.r':[['ต่ำ',0.1],['ปานกลาง',0.3],['สูง',0.5]],
+  'linreg.r2':[['เล็ก',0.02],['ปานกลาง',0.13],['ใหญ่',0.26]],
+  'cc.k':[['1:1',1],['1:2',2],['1:3',3],['1:4',4]],
+  'twomean.k':[['1:1',1],['1:2',2]],'twoprop.k':[['1:1',1],['1:2',2]],'cohort.k':[['1:1',1],['1:2',2]],
+  'surv.pi':[['1:1',50],['2:1',66.7]]
+};
+// wording refinements
+CALCS.prop.fields[1].label='ความคลาดเคลื่อนที่ยอมรับได้ (d)';
+CALCS.cohort.para=((orig)=>(v,z,r)=>orig(v,z,r).replace('การศึกษาแบบติดตามไปข้างหน้า','การศึกษาแบบไปข้างหน้า (prospective cohort study)'))(CALCS.cohort.para);
+
+// ---------- decision guide ----------
+const WIZ={
+  start:{q:'งานวิจัยของคุณต้องการทำอะไร',o:[
+    ['ประมาณค่าในประชากร','เช่น ความชุกของโรค หรือค่าเฉลี่ยระดับน้ำตาลในเลือด','est'],
+    ['เปรียบเทียบกลุ่ม หรือทดสอบผลของโปรแกรม/การรักษา','การศึกษาเชิงทดลอง กึ่งทดลอง หรือเปรียบเทียบระหว่างกลุ่ม','cmp'],
+    ['หาความสัมพันธ์หรือปัจจัยที่มีผล','สหสัมพันธ์ การถดถอยเชิงเส้น การถดถอยโลจิสติก','rel'],
+    ['การศึกษาทางระบาดวิทยา','Case-control, cohort, การรอดชีพ, อัตราอุบัติการณ์','epi'],
+    ['ตรวจสอบโมเดลหรือเครื่องมือวัด','การวิเคราะห์องค์ประกอบเชิงยืนยัน (CFA) และโมเดลสมการโครงสร้าง (SEM)','sem'],
+    ['ประเมินความแม่นยำของการตรวจวินิจฉัย','ความไวและความจำเพาะของเครื่องมือคัดกรอง','=diag']]},
+  est:{q:'ตัวแปรที่ต้องการประมาณค่าเป็นแบบใด',o:[['สัดส่วนหรือร้อยละ','เช่น ความชุก ร้อยละผู้มีพฤติกรรมเสี่ยง','estp'],['ค่าเฉลี่ย','เช่น ค่าเฉลี่ยคะแนน ความดันโลหิต','=mean']]},
+  estp:{q:'ต้องการใช้สูตรแบบใด',o:[['สูตรทั่วไป (แนะนำ)','กำหนดสัดส่วนที่คาดไว้จากงานวิจัยเดิมได้ ใช้ได้ทั้งกรณีทราบและไม่ทราบขนาดประชากร','=prop'],['Krejcie และ Morgan','ทราบขนาดประชากร ตรงกับตารางสำเร็จรูป','=krejcie'],['Yamane','ทราบขนาดประชากร สูตรอย่างง่าย','=yamane']]},
+  cmp:{q:'รูปแบบการเปรียบเทียบเป็นแบบใด',o:[['กลุ่มเดียว วัดก่อนและหลัง','วัดซ้ำในคนกลุ่มเดียวกัน','=paired'],['สองกลุ่มอิสระ','เช่น กลุ่มทดลองกับกลุ่มควบคุม','cmp2'],['ตั้งแต่สามกลุ่มขึ้นไป','ผลลัพธ์เป็นตัวแปรต่อเนื่อง','=anova'],['กลุ่มเดียวเทียบกับค่ามาตรฐาน','เช่น เทียบกับเป้าหมายหรือค่าอ้างอิง','cmp1'],['แสดงว่าวิธีใหม่ไม่ด้อยกว่าวิธีมาตรฐาน','Non-inferiority trial','cmpni'],["ทราบเพียงขนาดอิทธิพล (Cohen's d)",'คำนวณแบบ exact','=ttestd']]},
+  cmp2:{q:'ผลลัพธ์เป็นตัวแปรแบบใด',o:[['ตัวแปรต่อเนื่อง','เช่น คะแนน ระดับน้ำตาล น้ำหนัก','=twomean'],['สองค่า หรือสัดส่วน','เช่น หาย/ไม่หาย ปฏิบัติถูก/ไม่ถูก','=twoprop']]},
+  cmp1:{q:'ผลลัพธ์เป็นตัวแปรแบบใด',o:[['ตัวแปรต่อเนื่อง','','=onemean'],['สองค่า หรือสัดส่วน','','=oneprop']]},
+  cmpni:{q:'ผลลัพธ์เป็นตัวแปรแบบใด',o:[['ตัวแปรต่อเนื่อง','','=nimean'],['สองค่า หรือสัดส่วน','','=niprop']]},
+  rel:{q:'ตัวแปรตามเป็นแบบใด',o:[['ตัวแปรต่อเนื่อง','เช่น คะแนนพฤติกรรม ค่า HbA1c','relc'],['สองค่า','เช่น เป็นโรค/ไม่เป็นโรค ควบคุมได้/ไม่ได้','relb']]},
+  relc:{q:'ต้องการวิเคราะห์แบบใด',o:[['ความสัมพันธ์ระหว่างสองตัวแปร','Pearson correlation','=corr'],['ตัวแปรต้นหลายตัวร่วมกันทำนาย','Multiple linear regression','=linreg'],['ทดสอบตัวแปรกลุ่มหนึ่งหลังควบคุมตัวแปรอื่น','Hierarchical regression หรือตัวแปรกำกับ','=linreginc']]},
+  relb:{q:'ตัวแปรต้นหลักที่สนใจเป็นแบบใด',o:[['ตัวแปรต่อเนื่อง','เช่น อายุ ดัชนีมวลกาย','=logitc'],['สองค่า','เช่น เพศ การสูบบุหรี่','=logitb'],['หลายปัจจัย ไม่มีตัวแปรหลัก','ใช้หลักจำนวนเหตุการณ์ต่อตัวแปร','=epv']]},
+  epi:{q:'รูปแบบการศึกษาเป็นแบบใด',o:[['Case-control','เริ่มจากผู้ป่วยและกลุ่มควบคุม แล้วย้อนดูการสัมผัสปัจจัย','epicc'],['Cohort หรือ RCT','ติดตามไปข้างหน้า เปรียบเทียบอุบัติการณ์สะสม','=cohort'],['ติดตามระยะเวลาจนเกิดเหตุการณ์','Survival analysis','=surv'],['เปรียบเทียบอัตราต่อคน-เวลา','Incidence rate','=rates']]},
+  epicc:{q:'มีการจับคู่กลุ่มตัวอย่างหรือไม่',o:[['ไม่จับคู่','','=cc'],['จับคู่ 1:1','เช่น จับคู่ตามอายุและเพศ','=mcc']]},
+  sem:{q:'ต้องการใช้เกณฑ์แบบใด',o:[['อำนาจการทดสอบ RMSEA (แนะนำ)','อิงหลักสถิติ ต้องทราบ df ของโมเดล','=semr'],['อัตราส่วนต่อพารามิเตอร์','กฎทั่วไป ต้องทราบจำนวนพารามิเตอร์อิสระ','=semq']]}
+};
+
+// ---------- app identity & citation ----------
+const APP={name:'Sample Simple',version:'1.0',yearCE:2026,yearBE:2569,url:'https://claude.ai/artifact/NiZ9h4Gx96zBHBaeBBp1Te'};
+const CITE={
+  thRef:`รัชฎาภรณ์ อึ้งเจริญ และพัสกร องอาจ. (${APP.yearBE}). <i>Sample Simple: โปรแกรมคำนวณขนาดตัวอย่างสำหรับงานวิจัยทางการแพทย์และสาธารณสุข</i> (เวอร์ชัน ${APP.version}) [เว็บแอปพลิเคชัน]. คณะสาธารณสุขศาสตร์ มหาวิทยาลัยเกษตรศาสตร์. ${APP.url}`,
+  thIn:`(รัชฎาภรณ์ อึ้งเจริญ และพัสกร องอาจ, ${APP.yearBE})`,
+  enRef:`Ungcharoen, R., &amp; Ongarj, P. (${APP.yearCE}). <i>Sample Simple: Sample size calculator for medical and public health research</i> (Version ${APP.version}) [Web application]. Faculty of Public Health, Kasetsart University. ${APP.url}`,
+  enIn:`(Ungcharoen &amp; Ongarj, ${APP.yearCE})`
+};
+const REFS={
+  buderer:'Buderer, N. M. F. (1996). Statistical methodology: I. Incorporating the prevalence of disease into the sample size calculation for sensitivity and specificity. <i>Academic Emergency Medicine, 3</i>(9), 895–900. https://doi.org/10.1111/j.1553-2712.1996.tb03538.x',
+  chow:'Chow, S.-C., Shao, J., &amp; Wang, H. (2008). <i>Sample size calculations in clinical research</i> (2nd ed.). Chapman &amp; Hall/CRC.',
+  cohen:'Cohen, J. (1988). <i>Statistical power analysis for the behavioral sciences</i> (2nd ed.). Lawrence Erlbaum Associates.',
+  daniel:'Daniel, W. W. (1999). <i>Biostatistics: A foundation for analysis in the health sciences</i> (7th ed.). John Wiley &amp; Sons.',
+  faul07:'Faul, F., Erdfelder, E., Lang, A.-G., &amp; Buchner, A. (2007). G*Power 3: A flexible statistical power analysis program for the social, behavioral, and biomedical sciences. <i>Behavior Research Methods, 39</i>(2), 175–191. https://doi.org/10.3758/BF03193146',
+  faul09:'Faul, F., Erdfelder, E., Buchner, A., &amp; Lang, A.-G. (2009). Statistical power analyses using G*Power 3.1: Tests for correlation and regression analyses. <i>Behavior Research Methods, 41</i>(4), 1149–1160. https://doi.org/10.3758/BRM.41.4.1149',
+  fleiss:'Fleiss, J. L., Levin, B., &amp; Paik, M. C. (2003). <i>Statistical methods for rates and proportions</i> (3rd ed.). John Wiley &amp; Sons. https://doi.org/10.1002/0471445428',
+  hsieh:'Hsieh, F. Y., Bloch, D. A., &amp; Larsen, M. D. (1998). A simple method of sample size calculation for linear and logistic regression. <i>Statistics in Medicine, 17</i>(14), 1623–1634. https://doi.org/10.1002/(SICI)1097-0258(19980730)17:14&lt;1623::AID-SIM871&gt;3.0.CO;2-S',
+  hulley:'Hulley, S. B., Cummings, S. R., Browner, W. S., Grady, D. G., &amp; Newman, T. B. (2013). <i>Designing clinical research</i> (4th ed.). Lippincott Williams &amp; Wilkins.',
+  jackson:'Jackson, D. L. (2003). Revisiting sample size and number of parameter estimates: Some support for the N:q hypothesis. <i>Structural Equation Modeling, 10</i>(1), 128–141. https://doi.org/10.1207/S15328007SEM1001_6',
+  kelsey:'Kelsey, J. L., Whittemore, A. S., Evans, A. S., &amp; Thompson, W. D. (1996). <i>Methods in observational epidemiology</i> (2nd ed.). Oxford University Press.',
+  kish:'Kish, L. (1965). <i>Survey sampling</i>. John Wiley &amp; Sons.',
+  kline:'Kline, R. B. (2016). <i>Principles and practice of structural equation modeling</i> (4th ed.). Guilford Press.',
+  krejcie:'Krejcie, R. V., &amp; Morgan, D. W. (1970). Determining sample size for research activities. <i>Educational and Psychological Measurement, 30</i>(3), 607–610. https://doi.org/10.1177/001316447003000308',
+  lwanga:'Lwanga, S. K., &amp; Lemeshow, S. (1991). <i>Sample size determination in health studies: A practical manual</i>. World Health Organization.',
+  maccallum:'MacCallum, R. C., Browne, M. W., &amp; Sugawara, H. M. (1996). Power analysis and determination of sample size for covariance structure modeling. <i>Psychological Methods, 1</i>(2), 130–149. https://doi.org/10.1037/1082-989X.1.2.130',
+  peduzzi:'Peduzzi, P., Concato, J., Kemper, E., Holford, T. R., &amp; Feinstein, A. R. (1996). A simulation study of the number of events per variable in logistic regression analysis. <i>Journal of Clinical Epidemiology, 49</i>(12), 1373–1379. https://doi.org/10.1016/S0895-4356(96)00236-3',
+  schlesselman:'Schlesselman, J. J. (1982). <i>Case-control studies: Design, conduct, analysis</i>. Oxford University Press.',
+  schoenfeld:'Schoenfeld, D. A. (1983). Sample-size formula for the proportional-hazards regression model. <i>Biometrics, 39</i>(2), 499–503. https://doi.org/10.2307/2531021',
+  smith:'Smith, P. G., &amp; Morrow, R. H. (Eds.). (1996). <i>Field trials of health interventions in developing countries: A toolbox</i> (2nd ed.). Macmillan.',
+  yamane:'Yamane, T. (1967). <i>Statistics: An introductory analysis</i> (2nd ed.). Harper and Row.'
+};
+const pm=v=>v.cc==='k'?'kelsey':'fleiss';
+const REFMAP={prop:['daniel'],mean:['daniel'],yamane:['yamane'],krejcie:['krejcie'],onemean:['chow'],oneprop:['lwanga'],paired:['chow'],
+  ttestd:['faul07','cohen'],twomean:['chow'],twoprop:v=>[pm(v)],anova:['faul07','cohen'],niprop:['chow'],nimean:['chow'],
+  corr:['hulley'],linreg:['faul09'],linreginc:['faul09'],logitc:['hsieh'],logitb:['hsieh'],epv:['peduzzi'],
+  cc:v=>[pm(v)],mcc:['schlesselman'],cohort:v=>[pm(v)],surv:['schoenfeld'],rates:['smith'],
+  semr:['maccallum'],semq:v=>v.min>0?['jackson','kline']:['jackson'],diag:['buderer']};
+function refsFor(k,v,deff){const m=REFMAP[k];const keys=[...(typeof m==='function'?m(v):m)];if(deff>1)keys.push('kish');
+  return [...new Set(keys)].map(x=>REFS[x]).sort((a,b)=>a.localeCompare(b,'en'));}
+// ---------- English paragraphs ----------
+const MNAME_EN={f:'Fleiss et al. (2003)',k:'Kelsey et al. (1996)',fc:'Fleiss et al. (2003) with continuity correction'};
+const R='[reference]';
+const EN={
+  prop:(v,r)=>`The sample size was calculated using the formula for estimating a single population proportion${v.N>0?' with a finite population correction':''} (Daniel, 1999)${v.N>0?`, based on a population of ${int(v.N)}`:''}. The expected proportion was set at ${v.p}%, based on a previous study ${R}, with an acceptable margin of error of ${v.dt==='rel'?`${v.d}% of the expected proportion (relative precision)`:`${v.d}%`}, at ${r.stat}.`,
+  mean:(v,r)=>`The sample size was calculated using the formula for estimating a population mean (Daniel, 1999). The standard deviation was set at ${v.sd}, based on a previous study ${R}, with an acceptable margin of error of ${v.d}${v.N>0?` and a population of ${int(v.N)}`:''}, at ${r.stat}.`,
+  yamane:(v,r)=>`The sample size was calculated using Yamane's (1967) formula for a population of ${int(v.N)}, with a margin of error of ${v.e}% at a 95% confidence level.`,
+  krejcie:(v,r)=>`The sample size was calculated using the formula of Krejcie and Morgan (1970) for a population of ${int(v.N)}, with a population proportion of ${f(v.p/100)}, a margin of error of ${v.e}%, and a chi-square value of ${f(r.z.a**2,3)} (df = 1) at a ${r.conf}% confidence level.`,
+  onemean:(v,r)=>`The sample size was calculated using the formula for a one-sample test of a mean against a reference value (Chow et al., 2008), with a standard deviation of ${v.sd} and a minimum detectable difference of ${v.delta}, based on a previous study ${R}, at ${r.stat}.`,
+  oneprop:(v,r)=>`The sample size was calculated using the formula for a one-sample test of a proportion against a reference value (Lwanga & Lemeshow, 1991), with a reference proportion of ${v.p0}% and an expected proportion of ${v.p1}% ${R}, at ${r.stat}.`,
+  paired:(v,r)=>`The sample size was calculated using the formula for comparing two dependent means in a paired design (Chow et al., 2008), with a standard deviation of the differences of ${v.sdd} and an expected mean difference of ${v.delta}, based on a previous study ${R}, at ${r.stat}.`,
+  ttestd:(v,r)=>`The sample size for a ${v.test==='two'?'two-sample':'paired'} t-test was calculated using the noncentral t distribution, as implemented in G*Power (Faul et al., 2007), with an effect size (Cohen's d) of ${v.d} (Cohen, 1988) based on a previous study ${R}${v.test==='two'&&v.k!==1?`, an allocation ratio (group 2 to group 1) of ${v.k}`:''}, at ${r.stat}.`,
+  twomean:(v,r)=>`The sample size was calculated using the formula for comparing two independent means (Chow et al., 2008), with a standard deviation of ${v.sd} and a between-group mean difference of ${v.delta}, based on a previous study ${R}${v.k!==1?`, an allocation ratio (group 2 to group 1) of ${v.k}`:''}, at ${r.stat}.`,
+  twoprop:(v,r)=>`The sample size was calculated using the formula for comparing two independent proportions following the method of ${MNAME_EN[v.cc]}, with expected proportions of ${v.p1}% in group 1 and ${v.p2}% in group 2, based on a previous study ${R}${v.k!==1?`, an allocation ratio (group 2 to group 1) of ${v.k}`:''}, at ${r.stat}.`,
+  anova:(v,r)=>`The sample size for a one-way analysis of variance (ANOVA) with ${Math.round(v.g)} groups was calculated using the noncentral F distribution, as implemented in G*Power (Faul et al., 2007), with an effect size (Cohen's f) of ${v.ef} (Cohen, 1988) ${R}, at ${r.stat}.`,
+  niprop:(v,r)=>`The sample size for a non-inferiority comparison of two proportions was calculated (Chow et al., 2008), assuming success rates of ${v.pt}% and ${v.pc}% in the new and standard treatment groups, respectively ${R}, with a non-inferiority margin of ${v.m}%, at ${r.stat}.`,
+  nimean:(v,r)=>`The sample size for a non-inferiority comparison of two means was calculated (Chow et al., 2008), with a standard deviation of ${v.sd}, an expected difference of ${v.diff} ${R}, and a non-inferiority margin of ${v.m}, at ${r.stat}.`,
+  corr:(v,r)=>`The sample size for correlation analysis was calculated (Hulley et al., 2013), assuming a correlation coefficient of ${v.r} based on a previous study ${R}, at ${r.stat}.`,
+  linreg:(v,r)=>`The sample size for multiple linear regression was calculated using the noncentral F distribution, as implemented in G*Power (Faul et al., 2009), with ${Math.round(v.u)} predictors and an expected R² of ${v.r2} (effect size f² = ${f(v.r2/(1-v.r2),3)}) ${R}, at ${r.stat}.`,
+  linreginc:(v,r)=>`The sample size for testing the R² increase in multiple linear regression was calculated as implemented in G*Power (Faul et al., 2009), with ${Math.round(v.u)} predictors in total, ${Math.round(v.q)} tested predictors, an R² increase of ${v.dr2}, and a full-model R² of ${v.r2f} (f² = ${f(v.dr2/(1-v.r2f),3)}) ${R}, at ${r.stat}.`,
+  logitc:(v,r)=>`The sample size for multiple logistic regression with a continuous primary predictor was calculated using the method of Hsieh et al. (1998), with an event proportion of ${v.P}% and an odds ratio of ${v.or} per one standard deviation of the predictor ${R}, at ${r.stat}${v.rho>0?`, adjusted for a squared multiple correlation (ρ²) of ${v.rho} between the primary predictor and other covariates`:''}.`,
+  logitb:(v,r)=>`The sample size for multiple logistic regression with a binary primary predictor was calculated using the method of Hsieh et al. (1998), with an event proportion of ${v.p0}% in the unexposed group, an odds ratio of ${v.or}, and ${v.B}% of participants exposed ${R}, at ${r.stat}${v.rho>0?`, adjusted for a squared multiple correlation (ρ²) of ${v.rho}`:''}.`,
+  epv:(v,r)=>`The sample size was determined using the events-per-variable criterion of at least ${v.e} events per predictor (Peduzzi et al., 1996), with ${Math.round(v.k)} predictors and an expected event proportion of ${v.P}% ${R}.`,
+  cc:(v,r)=>`For this unmatched case-control study, the sample size was calculated following the method of ${MNAME_EN[v.cc]}, with an exposure proportion of ${v.p0}% among controls and an odds ratio of ${v.or} ${R}, a case-to-control ratio of 1:${v.k}, at ${r.stat}.`,
+  mcc:(v,r)=>`For this 1:1 matched case-control study, the sample size was calculated using the method of Schlesselman (1982), with an exposure proportion of ${v.p0}% among controls and an odds ratio of ${v.or} ${R}, at ${r.stat}.`,
+  cohort:(v,r)=>`For this prospective cohort study, the sample size was calculated following the method of ${MNAME_EN[v.cc]}, with an incidence of ${v.p0}% in the unexposed group and a risk ratio of ${v.rr} ${R}${v.k!==1?`, an unexposed-to-exposed ratio of ${v.k}`:''}, at ${r.stat}.`,
+  surv:(v,r)=>`The sample size for survival analysis was calculated using the formula of Schoenfeld (1983), with a hazard ratio of ${v.hr}, an allocation ratio of ${v.pi}:${Math.round((100-v.pi)*10)/10}, and an overall event probability of ${v.pe}% during follow-up ${R}, at ${r.stat}.`,
+  rates:(v,r)=>`The sample size for comparing two incidence rates was calculated (Smith & Morrow, 1996), with incidence rates of ${v.r0} and ${v.r1} per 1,000 person-years ${R}, at ${r.stat}.`,
+  semr:(v,r)=>{const E={close:'close fit (ε₀ = 0.05, εₐ = 0.08)',notclose:'not-close fit (ε₀ = 0.05, εₐ = 0.01)',exact:'exact fit (ε₀ = 0, εₐ = 0.05)'}[v.test];
+    return `The sample size for structural equation modeling was determined by RMSEA-based power analysis (MacCallum et al., 1996), using a test of ${E} for a model with ${Math.round(v.df)} degrees of freedom, at ${r.stat}.`;},
+  semq:(v,r)=>`The sample size for structural equation modeling was determined using a ratio of ${v.ratio} participants per free parameter (Jackson, 2003) for a model with ${Math.round(v.q)} free parameters${v.min>0?`, with a minimum of ${v.min} participants (Kline, 2016)`:''}.`,
+  diag:(v,r)=>`The sample size for estimating sensitivity and specificity was calculated using the method of Buderer (1996), with an expected sensitivity of ${v.se}%, specificity of ${v.sp}%, and disease prevalence of ${v.prev}% ${R}, and a margin of error of ${v.d}%, at ${r.stat}.`
+};
+const GROUP_EN={'กลุ่มที่ 1':'group 1','กลุ่มที่ 2':'group 2','กลุ่มผู้ป่วย':'the case group','กลุ่มควบคุม':'the control group','กลุ่มสัมผัส':'the exposed group','กลุ่มไม่สัมผัส':'the unexposed group'};
+const UNIT_EN={'คน':'participants','คน-ปี':'person-years'};
+// ---------- internationalisation (TH / EN) ----------
+const HINT_EN={
+  prop:'Cross-sectional studies, e.g., prevalence of diabetes in a community or the proportion of people with a risk behavior',
+  mean:'e.g., mean blood glucose or mean knowledge score',
+  yamane:'Descriptive surveys with a known population size, e.g., opinion or satisfaction surveys',
+  krejcie:'Surveys with a known population size; the basis of the Krejcie and Morgan table',
+  onemean:'e.g., comparing the mean HbA1c of patients with a target of 7%',
+  oneprop:'e.g., testing whether vaccination coverage differs from a 90% target',
+  paired:'Repeated measurements in the same group, e.g., one-group pretest–posttest quasi-experimental studies',
+  ttestd:'Use when only the effect size is known; exact calculation using the noncentral t distribution',
+  twomean:'Two-group quasi-experimental studies or RCTs with a continuous outcome',
+  twoprop:'e.g., recovery or adherence rates in an intervention group versus a control group',
+  anova:'Exact calculation using the noncentral F distribution',
+  niprop:'Clinical trials showing that a new treatment is not worse than the standard (higher values are better)',
+  nimean:'Showing that a new treatment is not worse than the standard when the outcome is continuous',
+  corr:'e.g., the association between health literacy and self-care behavior',
+  linreg:'Tests whether all predictors jointly explain the outcome (R² ≠ 0); exact method as in G*Power',
+  linreginc:'Hierarchical regression, or testing a set of predictors or a moderator after controlling for covariates',
+  logitc:'Hsieh et al. (1998), e.g., age, BMI, or knowledge score associated with a binary outcome',
+  logitb:'Hsieh et al. (1998), e.g., sex, smoking, or comorbidity',
+  epv:'Rule of thumb for logistic and Cox regression (Peduzzi et al., 1996)',
+  cc:'Compares exposure to a risk factor between cases and controls',
+  mcc:'Cases matched to controls by age, sex, or other factors (Schlesselman, 1982)',
+  cohort:'Follows exposed and unexposed groups and compares cumulative incidence',
+  surv:'Compares time to event between two groups (Schoenfeld, 1983)',
+  rates:'For outcomes expressed per person-time, e.g., incidence per 1,000 person-years',
+  semr:'MacCallum, Browne, and Sugawara (1996); exact calculation using the noncentral χ² distribution',
+  semq:'N:q rule of Jackson (2003) and Kline (2016)',
+  diag:'Accuracy of a screening or diagnostic test (Buderer, 1996)'
+};
+const METHOD_OPT_EN=[['f','Fleiss'],['k','Kelsey'],['fc','Fleiss with continuity correction']];
+const FIELD_EN={
+  '*.N':['Population size (N)','Leave blank if unknown or very large'],
+  '*.k':['Allocation ratio, group 2 : group 1 (k)','1 = equal group sizes'],
+  '*.cc':['Method','All three are standard methods; the continuity correction gives the largest sample size',METHOD_OPT_EN],
+  'prop.p':['Expected proportion (p)','From previous studies; use 50 if no data are available'],
+  'prop.d':['Acceptable margin of error (d)','Absolute 5 = ±5 percentage points; relative 20 = ±20% of p'],
+  'prop.dt':['Type of margin of error','Use relative precision when prevalence is below 10%',[['abs','Absolute'],['rel','Relative']]],
+  'mean.sd':['Standard deviation (σ)','From previous studies or a pilot study'],
+  'mean.d':['Acceptable margin of error (d)','Same unit as σ'],
+  'yamane.N':['Population size (N)','Total population'],
+  'yamane.e':['Margin of error (e)','Commonly 5'],
+  'krejcie.N':['Population size (N)','Total population'],
+  'krejcie.p':['Population proportion (p)','The original table uses 50'],
+  'krejcie.e':['Margin of error (e)','The original table uses 5'],
+  'onemean.sd':['Standard deviation (σ)','From previous studies'],
+  'onemean.delta':['Difference to detect (Δ)','Expected mean minus the reference value'],
+  'oneprop.p0':['Reference or target proportion (p₀)','Target or reference value'],
+  'oneprop.p1':['Expected proportion (p₁)','From previous studies'],
+  'paired.sdd':['SD of the differences (σd)','If unknown, σd = √(σ₁² + σ₂² − 2ρσ₁σ₂)'],
+  'paired.delta':['Expected mean difference (Δ)','Post minus pre'],
+  'ttestd.test':['Design','',[['paired','One group or pre–post (paired)'],['two','Two independent groups']]],
+  'ttestd.d':["Effect size (Cohen's d)",'0.2 small, 0.5 medium, 0.8 large (Cohen, 1988)'],
+  'twomean.sd':['Pooled standard deviation (σ)','From previous studies'],
+  'twomean.delta':['Mean difference (Δ)','Clinically meaningful difference'],
+  'twoprop.p1':['Proportion in group 1 (p₁)','e.g., intervention group'],
+  'twoprop.p2':['Proportion in group 2 (p₂)','e.g., control group'],
+  'anova.g':['Number of groups (k)',''],
+  'anova.ef':["Effect size (Cohen's f)",'0.10 small, 0.25 medium, 0.40 large, or f = √(η²/(1 − η²))'],
+  'niprop.pt':['Success rate, new treatment (pT)',''],
+  'niprop.pc':['Success rate, standard treatment (pC)',''],
+  'niprop.m':['Non-inferiority margin (δ)','Largest clinically acceptable difference'],
+  'nimean.sd':['Standard deviation (σ)',''],
+  'nimean.diff':['Expected true difference (μT − μC)','Usually 0'],
+  'nimean.m':['Non-inferiority margin (δ)',''],
+  'corr.r':['Expected correlation coefficient (r)','0.1 small, 0.3 medium, 0.5 large (Cohen, 1988)'],
+  'linreg.r2':['Expected R²','Cohen: 0.02 small, 0.13 medium, 0.26 large'],
+  'linreg.u':['Number of predictors','Count each dummy variable separately'],
+  'linreginc.dr2':['R² increase (ΔR²)','Contributed by the tested predictors'],
+  'linreginc.r2f':['Full-model R²','All predictors included'],
+  'linreginc.u':['Total number of predictors',''],
+  'linreginc.q':['Number of tested predictors','Cannot exceed the total'],
+  'logitc.P':['Event proportion (P)','e.g., proportion of patients with poor glycemic control'],
+  'logitc.or':['Odds ratio per 1 SD of the predictor','From previous studies'],
+  'logitc.rho':['R² between the primary predictor and other covariates (ρ²)','Use 0 for simple logistic regression'],
+  'logitb.p0':['Event proportion when X = 0','e.g., among non-smokers'],
+  'logitb.or':['Expected odds ratio','From previous studies'],
+  'logitb.B':['Proportion with X = 1 (B)','e.g., prevalence of smoking in the population'],
+  'logitb.rho':['R² between the primary predictor and other covariates (ρ²)','Use 0 for simple logistic regression'],
+  'epv.k':['Number of predictors','Count each dummy variable separately'],
+  'epv.P':['Event proportion','Use the less frequent outcome category'],
+  'epv.e':['Events per variable','',[['10','10 (Peduzzi et al., 1996)'],['15','15'],['20','20 (conservative)']]],
+  'cc.p0':['Exposure proportion among controls (p₀)','From previous studies'],
+  'cc.or':['Odds ratio to detect',''],
+  'cc.k':['Controls per case','Little additional gain beyond 4'],
+  'mcc.p0':['Exposure proportion among controls (p₀)',''],
+  'mcc.or':['Odds ratio to detect',''],
+  'cohort.p0':['Incidence among the unexposed (p₀)',''],
+  'cohort.rr':['Risk ratio to detect',''],
+  'cohort.k':['Ratio of unexposed to exposed',''],
+  'surv.hr':['Hazard ratio to detect',''],
+  'surv.pi':['Proportion allocated to group 1','50 = equal allocation'],
+  'surv.pe':['Overall probability of the event during follow-up','Both groups combined'],
+  'rates.r0':['Rate in group 1 per 1,000 person-years',''],
+  'rates.r1':['Rate in group 2 per 1,000 person-years',''],
+  'semr.df':['Model degrees of freedom (df)','df = p(p + 1)/2 − number of free parameters; p = number of observed variables'],
+  'semr.test':['Hypothesis tested','Close fit is the most widely used',[['close','Close fit (ε₀ = 0.05, εₐ = 0.08)'],['notclose','Not-close fit (ε₀ = 0.05, εₐ = 0.01)'],['exact','Exact fit (ε₀ = 0, εₐ = 0.05)']]],
+  'semq.q':['Number of free parameters (q)','Loadings + error variances + path coefficients + covariances'],
+  'semq.ratio':['Sample-to-parameter ratio','',[['5','5:1 (minimum)'],['10','10:1 (acceptable)'],['20','20:1 (recommended, Jackson 2003)']]],
+  'semq.min':['Minimum sample size','Kline (2016) recommends at least 200'],
+  'diag.se':['Expected sensitivity',''],
+  'diag.sp':['Expected specificity',''],
+  'diag.prev':['Disease prevalence in the study population',''],
+  'diag.d':['Acceptable margin of error (d)','']
+};
+const UNIT_UI_EN={'หน่วย':'units','คน':'','ตัว':'','กลุ่ม':'','เท่า':'×','ราย':'','%':'%'};
+const PRESET_EN={'ไม่ทราบค่า':'Unknown','เล็ก':'Small','ปานกลาง':'Medium','ใหญ่':'Large','ต่ำ':'Small','สูง':'Large'};
+const GROUP_UI_EN={'กลุ่มที่ 1':'Group 1','กลุ่มที่ 2':'Group 2','กลุ่มผู้ป่วย':'Cases','กลุ่มควบคุม':'Controls','กลุ่มสัมผัส':'Exposed','กลุ่มไม่สัมผัส':'Unexposed'};
+const TR_EXACT={
+  'ค่า d มากเกินไปเมื่อเทียบกับ p ช่วงความเชื่อมั่นจะติดลบหรือเกิน 100% ควรลด d หรือเปลี่ยนเป็นค่าสัมพัทธ์':'d is too large relative to p; the confidence interval would fall below 0% or above 100%. Reduce d or use relative precision.',
+  'สูตรนี้สมมติ p = 0.5 และความเชื่อมั่น 95% เหมาะกับการสำรวจเชิงพรรณนาเท่านั้น ไม่เหมาะกับงานที่ทดสอบสมมติฐานหรือหาปัจจัยที่มีผล':'This formula assumes p = 0.5 and a 95% confidence level. It is suitable only for descriptive surveys, not for hypothesis testing or identifying associated factors.',
+  'p₀ และ p₁ ต้องไม่เท่ากัน':'p₀ and p₁ must differ.','p₁ และ p₂ ต้องไม่เท่ากัน':'p₁ and p₂ must differ.',
+  'pT − pC + δ ต้องมากกว่า 0':'pT − pC + δ must be greater than 0.','(μT − μC) + δ ต้องมากกว่า 0':'(μT − μC) + δ must be greater than 0.',
+  'ค่า r ต้องอยู่ระหว่าง −0.99 ถึง 0.99 และไม่เท่ากับ 0':'r must be between −0.99 and 0.99 and must not be 0.',
+  'จำนวนตัวแปรที่ทดสอบต้องไม่เกินจำนวนทั้งหมด':'The number of tested predictors cannot exceed the total number of predictors.',
+  'ΔR² ต้องน้อยกว่า R² ของโมเดลเต็ม':'ΔR² must be smaller than the full-model R².',
+  'OR ต้องไม่เท่ากับ 1':'OR must not equal 1.','RR ต้องไม่เท่ากับ 1':'RR must not equal 1.','RR × p₀ ต้องน้อยกว่า 100%':'RR × p₀ must be less than 100%.',
+  'HR ต้องไม่เท่ากับ 1':'HR must not equal 1.','อัตราทั้งสองกลุ่มต้องไม่เท่ากัน':'The two rates must differ.'
+};
+const TR_PHRASES=[
+  ['ตรวจสอบแบบ exact (noncentral t, วิธีเดียวกับ G*Power) ได้ ','Exact check (noncentral t, as in G*Power): n = '],
+  [' คนต่อกลุ่ม',' per group'],
+  ['เปรียบเทียบสามวิธี (กลุ่มที่ 1): ','Comparison of the three methods (group 1): '],
+  ['Fleiss ปรับความต่อเนื่อง','Fleiss with continuity correction'],
+  ['power ที่ได้จริง','achieved power'],
+  ['n/กลุ่ม','n per group'],
+  ['เปรียบเทียบกฎของ Green (1991): ทดสอบโมเดลรวม',"Green's (1991) rules of thumb: overall model"],
+  [', ทดสอบตัวแปรรายตัว',', individual predictors'],
+  ['จำนวนเหตุการณ์ที่ต้องการ d','required events d'],
+  ['เหตุการณ์ที่ต้องการ','required events'],
+  ['คู่ทั้งหมด','total pairs'],['คู่ที่ไม่ตรงกัน','discordant pairs'],
+  ['คน-ปี/กลุ่ม','person-years per group'],[' คน-ปี ต่อกลุ่ม',' person-years per group'],
+  ['ทดสอบด้วย noncentral χ²','tested with the noncentral χ² distribution'],
+  ['อัตราส่วน','ratio'],['ขั้นต่ำ','minimum'],['เปรียบเทียบ: ','Comparison: '],['ใช้ค่าที่มากกว่า','the larger value is used'],
+  ['ปรับด้วย N = ','corrected for N = '],[' ได้ ',' gives '],[' และ ',' and '],[' คน',' participants']
+];
+function tr(s){if(lang!=='en'||!s)return s;if(TR_EXACT[s])return TR_EXACT[s];let o=s;for(const [a,b] of TR_PHRASES)o=o.split(a).join(b);return o;}
+const WIZ_EN={
+  start:{q:'What does your study aim to do?',o:[
+    ['Estimate a population value','e.g., disease prevalence or mean blood glucose','est'],
+    ['Compare groups or test an intervention','Experimental, quasi-experimental, or comparative studies','cmp'],
+    ['Examine associations or associated factors','Correlation, linear regression, logistic regression','rel'],
+    ['Epidemiological study','Case-control, cohort, survival, incidence rates','epi'],
+    ['Validate a model or measurement instrument','Confirmatory factor analysis (CFA) and structural equation modeling (SEM)','sem'],
+    ['Evaluate diagnostic accuracy','Sensitivity and specificity of a screening tool','=diag']]},
+  est:{q:'What type of variable will you estimate?',o:[['A proportion or percentage','e.g., prevalence or the percentage with a risk behavior','estp'],['A mean','e.g., mean score or blood pressure','=mean']]},
+  estp:{q:'Which formula do you want to use?',o:[['General formula (recommended)','Uses the expected proportion from previous studies; works with or without a known population size','=prop'],['Krejcie and Morgan','Known population size; matches the published table','=krejcie'],['Yamane','Known population size; simplified formula','=yamane']]},
+  cmp:{q:'What kind of comparison?',o:[['One group, pre–post','Repeated measurements in the same people','=paired'],['Two independent groups','e.g., intervention versus control','cmp2'],['Three or more groups','Continuous outcome','=anova'],['One group versus a reference value','e.g., compared with a target or standard','cmp1'],['Show a new treatment is not worse than the standard','Non-inferiority trial','cmpni'],["Only the effect size (Cohen's d) is known",'Exact calculation','=ttestd']]},
+  cmp2:{q:'What type of outcome?',o:[['Continuous','e.g., score, blood glucose, body weight','=twomean'],['Binary or proportion','e.g., recovered/not recovered','=twoprop']]},
+  cmp1:{q:'What type of outcome?',o:[['Continuous','','=onemean'],['Binary or proportion','','=oneprop']]},
+  cmpni:{q:'What type of outcome?',o:[['Continuous','','=nimean'],['Binary or proportion','','=niprop']]},
+  rel:{q:'What type of dependent variable?',o:[['Continuous','e.g., behavior score, HbA1c','relc'],['Binary','e.g., disease/no disease, controlled/uncontrolled','relb']]},
+  relc:{q:'What analysis do you plan?',o:[['Association between two variables','Pearson correlation','=corr'],['Several predictors jointly predicting the outcome','Multiple linear regression','=linreg'],['Testing a set of predictors after controlling for others','Hierarchical regression or moderator','=linreginc']]},
+  relb:{q:'What type is the primary predictor of interest?',o:[['Continuous','e.g., age, BMI','=logitc'],['Binary','e.g., sex, smoking','=logitb'],['Several factors, no single primary predictor','Events-per-variable rule','=epv']]},
+  epi:{q:'What is the study design?',o:[['Case-control','Starts from cases and controls, then looks back at exposure','epicc'],['Cohort or RCT','Follows participants forward and compares cumulative incidence','=cohort'],['Time to event','Survival analysis','=surv'],['Rates per person-time','Incidence rates','=rates']]},
+  epicc:{q:'Are cases and controls matched?',o:[['Unmatched','','=cc'],['Matched 1:1','e.g., matched by age and sex','=mcc']]},
+  sem:{q:'Which criterion do you want to use?',o:[['RMSEA power analysis (recommended)','Statistically based; requires the model df','=semr'],['Sample-to-parameter ratio','Rule of thumb; requires the number of free parameters','=semq']]}
+};
+const U={
+ th:{sub:'โปรแกรมคำนวณขนาดตัวอย่างสำหรับงานวิจัยทางด้านการแพทย์ สาธารณสุข และวิทยาศาสตร์สุขภาพ',
+   by:'พัฒนาโดย รศ.ดร.รัชฎาภรณ์ อึ้งเจริญ คณะสาธารณสุขศาสตร์ มหาวิทยาลัยเกษตรศาสตร์',
+   guide:'ช่วยเลือกสูตร',search:'ค้นหา เช่น cohort, ANOVA, ความชุก',noResult:'ไม่พบวิธีที่ค้นหา ลองใช้คำอื่น หรือกดปุ่ม "ช่วยเลือกสูตร"',
+   reset:'คืนค่าเริ่มต้น',stat:'เกณฑ์ทางสถิติ',alpha:'ระดับนัยสำคัญ (α)',a05:'0.05 (ความเชื่อมั่น 95%)',a01:'0.01 (ความเชื่อมั่น 99%)',a10:'0.10 (ความเชื่อมั่น 90%)',
+   tail:'ทิศทางการทดสอบ',two:'สองทาง (two-sided)',one:'ทางเดียว (one-sided)',power:'อำนาจการทดสอบ (power, 1 − β)',
+   adj:'การปรับขนาดตัวอย่าง',drop:'อัตราการสูญหาย (drop-out / non-response)',cluster:'ใช้การสุ่มแบบกลุ่ม (cluster sampling)',
+   deff:'Design effect (DEFF)',deffHelp:'นิยมใช้ 1.5–2 หรือคำนวณจาก ICC',deffCalc:'คำนวณจาก m และ ICC ได้ DEFF = ',cm:'ขนาดเฉลี่ยต่อกลุ่ม (m)',icc:'สหสัมพันธ์ภายในกลุ่ม (ICC)',
+   iccHelp:'ถ้ากรอก m และ ICC จะคำนวณ DEFF = 1 + (m − 1) × ICC ให้อัตโนมัติ',notSet:'ไม่ระบุ',unknown:'ไม่ทราบ',
+   oneSided:'ทดสอบทางเดียว ตามแนวปฏิบัติของ non-inferiority trial นิยมใช้ 0.025',
+   big:'ขนาดตัวอย่างที่ต้องใช้',bigAll:'ขนาดตัวอย่างที่ต้องใช้ (รวมทุกกลุ่ม)',unit:'คน',unitPY:'คน-ปี',
+   perGroup:n=>`กลุ่มละ ${n}`,groupsOf:(n,u,m)=>`กลุ่มละ ${n} ${u} จำนวน ${m} กลุ่ม`,pairsOf:n=>`จำนวน ${n} คู่`,
+   l1:'ผลจากสูตร',l2:'ปัดขึ้นเป็นจำนวนเต็ม',l3:'× Design effect',noAdj:'(ไม่ได้ปรับ)',l4:'ชดเชยการสูญหาย',tagG:' /กลุ่ม',tagP:' คู่',
+   missing:'กรอกค่าให้ครบทุกช่องที่จำเป็นเพื่อคำนวณ',err:'ค่าที่กรอกทำให้คำนวณไม่ได้ ตรวจสอบค่าอีกครั้ง',err2:'ค่าที่กรอกทำให้ได้ขนาดตัวอย่างที่ไม่สมเหตุสมผล (มากกว่า 500,000 หรือคำนวณไม่ได้) ตรวจสอบค่าอีกครั้ง',
+   mbar:'ต้องใช้',mbtn:'ดูรายละเอียด',
+   foot:'สูตรทุกสูตรตรวจสอบกับเอกสารต้นฉบับและค่าอ้างอิงที่ตีพิมพ์แล้ว ความถูกต้องของผลลัพธ์จึงขึ้นอยู่กับค่าพารามิเตอร์ที่กรอก ซึ่งควรอ้างอิงจากงานวิจัยที่ผ่านมาหรือการศึกษานำร่อง และแทนที่ [แหล่งอ้างอิง] ในย่อหน้าด้วยเอกสารจริง',
+   ver:'เวอร์ชัน',dlgIntro:'ตอบคำถามสั้นๆ เพื่อเลือกวิธีคำนวณที่เหมาะสม',q:n=>`คำถามที่ ${n}`,recTitle:'วิธีที่แนะนำ',recH:'วิธีคำนวณที่เหมาะกับงานวิจัยของคุณ',use:'ใช้วิธีนี้',back:'ย้อนกลับ',close:'ปิด',
+   para:'ย่อหน้าสำหรับบทวิธีดำเนินการวิจัย',ref:'เอกสารอ้างอิง (APA 7th)',cp:'คัดลอกย่อหน้า',cr:'คัดลอกเอกสารอ้างอิง',ok:'คัดลอกแล้ว',help:'วางใน Word แล้วตัวเอียงจะติดไปด้วย',fail:'เลือกข้อความแล้ว กด Ctrl+C'},
+ en:{sub:'Sample size calculator for medical, public health, and health sciences research',
+   by:'Developed by Assoc. Prof. Dr. Ratchadaporn Ungcharoen, Faculty of Public Health, Kasetsart University',
+   guide:'Help me choose',search:'Search, e.g., cohort, ANOVA, prevalence',noResult:'No matching method. Try another term or use "Help me choose".',
+   reset:'Reset',stat:'Statistical criteria',alpha:'Significance level (α)',a05:'0.05 (95% confidence)',a01:'0.01 (99% confidence)',a10:'0.10 (90% confidence)',
+   tail:'Test direction',two:'Two-sided',one:'One-sided',power:'Power (1 − β)',
+   adj:'Sample size adjustments',drop:'Attrition / non-response rate',cluster:'Cluster sampling',
+   deff:'Design effect (DEFF)',deffHelp:'Commonly 1.5–2, or calculate from the ICC',deffCalc:'Calculated from m and ICC: DEFF = ',cm:'Average cluster size (m)',icc:'Intraclass correlation (ICC)',
+   iccHelp:'Enter m and ICC to calculate DEFF = 1 + (m − 1) × ICC automatically',notSet:'Not set',unknown:'Unknown',
+   oneSided:'One-sided test; 0.025 is conventional for non-inferiority trials',
+   big:'Required sample size',bigAll:'Required sample size (all groups)',unit:'participants',unitPY:'person-years',
+   perGroup:n=>`${n} per group`,groupsOf:(n,u,m)=>`${n} ${u} per group, ${m} groups`,pairsOf:n=>`${n} matched pairs`,
+   l1:'Formula result',l2:'Rounded up',l3:'× Design effect',noAdj:'(not applied)',l4:'attrition adjustment',tagG:' /group',tagP:' pairs',
+   missing:'Please complete all required fields.',err:'The values entered cannot be calculated. Please check them.',err2:'The values entered give an implausible sample size (over 500,000 or incalculable). Please check them.',
+   mbar:'Required:',mbtn:'Details',
+   foot:'All formulas have been verified against the original sources and published reference values. The accuracy of the results therefore depends on the parameters entered, which should be based on previous studies or a pilot study; replace [reference] in the paragraph with the actual source.',
+   ver:'Version',dlgIntro:'Answer a few short questions to find the right method',q:n=>`Question ${n}`,recTitle:'Recommended method',recH:'The method that fits your study',use:'Use this method',back:'Back',close:'Close',
+   para:'Sample size statement for the Methods section',ref:'References (APA 7th)',cp:'Copy paragraph',cr:'Copy references',ok:'Copied',help:'Italics are preserved when pasted into Word',fail:'Text selected, press Ctrl+C'}
+};
+// ---------- UI ----------
+const $=id=>document.getElementById(id);
+let current='prop',lastPara='',lastRefs=[],timer,lang='th';
+try{const s=localStorage.getItem('ss_lang');if(s==='en'||s==='th')lang=s;}catch(e){}
+const t=()=>U[lang];
+const cName=c=>lang==='en'?c.en:c.name;
+const catName=([ck,cn,ce])=>lang==='en'?ce:cn;
+
+function buildNav(q=''){
+  q=q.trim().toLowerCase();
+  $('nav').innerHTML=CATS.map(cat=>{
+    const [ck,cn,ce]=cat;
+    const items=Object.entries(CALCS).filter(([k,c])=>c.cat===ck&&(!q||[c.name,c.en,c.hint,HINT_EN[k],cn,ce].join(' ').toLowerCase().includes(q)));
+    if(!items.length)return '';
+    return `<div class="cat"><h3>${catName(cat)}${lang==='th'?`<small>${ce}</small>`:''}</h3>${items.map(([k,c])=>`<button type="button" data-k="${k}" aria-pressed="${k===current}">${cName(c)}${lang==='th'?`<small>${c.en}</small>`:''}</button>`).join('')}</div>`;
+  }).join('')||`<p class="help">${t().noResult}</p>`;
+  $('nav').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.k)));
+}
+function buildMobile(){
+  $('mselect').innerHTML=CATS.map(cat=>`<optgroup label="${catName(cat)}">${Object.entries(CALCS).filter(([k,c])=>c.cat===cat[0]).map(([k,c])=>`<option value="${k}">${cName(c)}</option>`).join('')}</optgroup>`).join('');
+  $('mselect').value=current;
+}
+$('mselect').addEventListener('change',e=>select(e.target.value));
+$('search').addEventListener('input',e=>buildNav(e.target.value));
+
+function fieldText(k,fl){
+  if(lang!=='en')return {label:fl.label,help:fl.help||'',options:fl.options,unit:fl.unit};
+  const e=FIELD_EN[k+'.'+fl.id]||FIELD_EN['*.'+fl.id]||[fl.label,fl.help];
+  return {label:e[0],help:e[1]||'',options:e[2]||fl.options,unit:fl.unit in UNIT_UI_EN?UNIT_UI_EN[fl.unit]:fl.unit};
+}
+function fieldHTML(fl,k){
+  const x=fieldText(k,fl);
+  const ctrl=fl.type==='select'
+    ?`<select id="f_${fl.id}">${x.options.map(([v,l])=>`<option value="${v}"${v===fl.def?' selected':''}>${l}</option>`).join('')}</select>`
+    :`<input id="f_${fl.id}" type="number" inputmode="decimal" value="${fl.def}"${fl.min!=null?` min="${fl.min}"`:''}${fl.max!=null?` max="${fl.max}"`:''} step="${fl.step||'any'}"${fl.optional?` placeholder="${t().unknown}"`:''}>`+(x.unit?`<span class="unit">${x.unit}</span>`:'');
+  const ps=PRESETS[k+'.'+fl.id];
+  const chips=ps?`<div class="chips">${ps.map(([l,v])=>`<button type="button" data-for="f_${fl.id}" data-v="${v}">${l.includes(':')?l:`${lang==='en'?(PRESET_EN[l]||l):l} ${v}`}</button>`).join('')}</div>`:'';
+  return `<div class="field" data-f="${fl.id}"><label for="f_${fl.id}">${x.label}</label><div class="inputrow">${ctrl}</div>${chips}<div class="help">${x.help}</div></div>`;
+}
+function markChips(){document.querySelectorAll('.chips button').forEach(b=>{const el=$(b.dataset.for||'dropout');b.classList.toggle('on',!!el&&parseFloat(el.value)===parseFloat(b.dataset.v));});}
+document.addEventListener('click',e=>{const b=e.target.closest('.chips button');if(!b)return;const el=$(b.dataset.for||'dropout');el.value=b.dataset.v;markChips();schedule();});
+
+function readValues(){const v={};CALCS[current].fields.forEach(fl=>{const el=$('f_'+fl.id);if(el)v[fl.id]=el.value;});return v;}
+function renderFields(keep){
+  const c=CALCS[current];
+  $('fields').innerHTML=c.fields.map(fl=>fieldHTML(fl,current)).join('');
+  if(keep)Object.entries(keep).forEach(([id,val])=>{const el=$('f_'+id);if(el)el.value=val;});
+  $('fields').querySelectorAll('input,select').forEach(i=>{i.addEventListener('input',()=>{markChips();schedule();});i.addEventListener('change',schedule);});
+}
+function renderHead(){
+  const c=CALCS[current];
+  $('calcName').textContent=cName(c);$('calcEn').textContent=lang==='th'?c.en:'';$('calcEn').hidden=lang!=='th';
+  $('calcHint').textContent=lang==='en'?HINT_EN[current]:c.hint;
+  $('alphaHelp').textContent=c.oneSided?t().oneSided:'';
+}
+function select(k){
+  if(!CALCS[k])k='prop';current=k;const c=CALCS[k];
+  buildNav($('search').value);$('mselect').value=k;
+  try{history.replaceState(null,'','#'+k);}catch(e){}
+  renderHead();renderFields();
+  $('statBlock').style.display=c.noAlpha?'none':'';
+  $('tailField').style.display=(c.noTail||c.oneSided)?'none':'';
+  $('powerField').style.display=c.power?'':'none';
+  markChips();calc();
+}
+$('resetBtn').addEventListener('click',()=>select(current));
+['alpha','tail','power','dropout','deff','cm','icc'].forEach(id=>{$(id).addEventListener('input',()=>{markChips();schedule();});$(id).addEventListener('change',schedule);});
+$('clusterOn').addEventListener('change',e=>{$('clusterBox').hidden=!e.target.checked;calc();});
+function schedule(){clearTimeout(timer);timer=setTimeout(calc,90);}
+function toggleRatio(c,v){const el=$('fields').querySelector('[data-f="k"]');if(el&&c===CALCS.ttestd)el.style.display=v.test==='two'?'':'none';}
+
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-t]').forEach(el=>{const v=t()[el.dataset.t];if(typeof v==='string')el.textContent=v;});
+  document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===lang));
+  $('search').placeholder=t().search;$('cm').placeholder=t().notSet;$('icc').placeholder=t().notSet;
+  $('dlgClose').setAttribute('aria-label',t().close);
+  $('paraTitle').textContent=t().para;$('refTitle').textContent=t().ref;$('copyBtn').textContent=t().cp;$('copyRefs').textContent=t().cr;$('refHelp').textContent=t().help;
+  document.title=lang==='en'?'Sample Simple | Sample size calculator':'Sample Simple | โปรแกรมคำนวณขนาดตัวอย่าง';
+}
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>{
+  if(lang===b.dataset.lang)return;const keep=readValues();
+  lang=b.dataset.lang;try{localStorage.setItem('ss_lang',lang);}catch(e){}
+  applyLang();buildNav($('search').value);buildMobile();renderHead();renderFields(keep);markChips();calc();
+}));
+
+function clearOut(msg){const w=$('warn');w.textContent=tr(msg);w.classList.add('show');
+  ['split','ladder','formula','subst','extra','note','paragraph','refList'].forEach(id=>$(id).innerHTML='');$('bigN').textContent='–';$('mbarN').textContent='–';lastPara='';lastRefs=[];}
+
+function calc(){
+  const c=CALCS[current],v={};let missing=false;const T=t();
+  c.fields.forEach(fl=>{const raw=$('f_'+fl.id).value;
+    if(fl.type==='select')v[fl.id]=raw;else if(raw===''){if(fl.optional)v[fl.id]=0;else missing=true;}else v[fl.id]=parseFloat(raw);});
+  toggleRatio(c,v);
+  const alpha=parseFloat($('alpha').value),power=parseFloat($('power').value);
+  const tails=c.oneSided?1:(c.noTail?2:parseInt($('tail').value));
+  const dropout=Math.max(0,Math.min(90,parseFloat($('dropout').value)||0));
+  const clusterOn=$('clusterOn').checked;
+  const cm=parseFloat($('cm').value),icc=parseFloat($('icc').value);
+  const iccMode=clusterOn&&cm>0&&icc>=0&&!isNaN(icc);
+  const deff=!clusterOn?1:(iccMode?1+(cm-1)*icc:Math.max(1,parseFloat($('deff').value)||1));
+  $('deff').disabled=iccMode;if(iccMode)$('deff').value=f(deff,3);
+  $('deffHelp').textContent=iccMode?T.deffCalc+f(deff,3):T.deffHelp;
+  if(missing)return clearOut(T.missing);
+  const w=c.warn?c.warn(v):null;if(w)return clearOut(w);
+  const z={a:qnorm(1-alpha/tails),b:qnorm(power)};
+  let res;try{res=c.compute(v,z,{alpha,tails,power});}catch(e){return clearOut(T.err);}
+  const G=res.groups;
+  if(!G.every(g=>isFinite(g.n)&&g.n>0))return clearOut(T.err2);
+  $('warn').classList.remove('show');
+  const unit=c.unit||'คน';const uDisp=lang==='en'?(unit==='คน-ปี'?T.unitPY:T.unit):unit;
+  G.forEach(g=>{g.base=Math.ceil(g.n-1e-9);g.deffN=Math.ceil(g.base*deff-1e-9);g.final=Math.ceil(g.deffN/(1-dropout/100)-1e-9);});
+  const total=G.reduce((s,g)=>s+g.final*g.mult,0);
+  const pairs=G.length===1&&G[0].label==='คู่';
+  const gl=g=>lang==='en'?(GROUP_UI_EN[g.label]||g.label):g.label;
+  const vals=key=>G.map(g=>int(g[key])).join(' / ');
+  const perTag=G.length>1?'':(pairs?T.tagP:(G[0].mult>1?T.tagG:''));
+
+  $('bigLabel').textContent=(G.length>1||G[0].mult>1)?T.bigAll:T.big;
+  $('bigN').textContent=int(total);$('bigUnit').textContent=uDisp;$('mbarN').textContent=int(total);$('mbarU').textContent=uDisp;
+  $('split').textContent=G.length>1?G.map(g=>`${gl(g)} ${int(g.final)}`).join(', ')+` ${uDisp}`:(pairs?T.pairsOf(int(G[0].final)):(G[0].mult>1?T.groupsOf(int(G[0].final),uDisp,G[0].mult):''));
+  $('ladder').innerHTML=`
+    <li><span>${T.l1}${G.length>1?' ('+G.map(gl).join(' / ')+')':''}</span><span class="v">${G.map(g=>Number.isInteger(g.n)?int(g.n):f(g.n)).join(' / ')}</span></li>
+    <li><span>${T.l2}</span><span class="v">${vals('base')}${perTag}</span></li>
+    <li class="${deff>1?'':'off'}"><span>${T.l3} ${deff>1?f(deff,2).replace(/\.?0+$/,''):T.noAdj}</span><span class="v">${vals('deffN')}${perTag}</span></li>
+    <li class="${dropout>0?'':'off'}"><span>÷ (1 − ${f(dropout/100)}) ${T.l4}</span><span class="v">${vals('final')}${perTag}</span></li>`;
+  $('formula').textContent=tr(res.formula);$('subst').textContent=tr(res.sub);
+  $('extra').textContent=tr(res.extra||'');$('note').textContent=c.note?tr(c.note(v)):'';
+
+  const conf=Math.round((1-alpha)*100*10)/10;
+  if(lang==='th'){
+    const desc=key=>{
+      if(G.length>1)return G.map(g=>`${g.label} ${int(g[key])} ${unit}`).join(' และ');
+      if(pairs)return `${int(G[0][key])} คู่`;
+      if(G[0].mult>1)return `กลุ่มละ ${int(G[0][key])} ${unit}`;
+      return `${int(G[0][key])} ${unit}`;};
+    const tailTxt=tails===2?'ทดสอบสองทาง':'ทดสอบทางเดียว';
+    let stat='';
+    if(!c.noAlpha){
+      if(c.power)stat=c.exact?`ระดับนัยสำคัญ ${alpha}${c.noTail?'':` (${tailTxt})`} และอำนาจการทดสอบร้อยละ ${Math.round(power*100)}`
+        :`ระดับนัยสำคัญ ${alpha} (${tailTxt}, Zα = ${f(z.a)}) และอำนาจการทดสอบร้อยละ ${Math.round(power*100)} (Zβ = ${f(z.b)})`;
+      else stat=`ระดับความเชื่อมั่นร้อยละ ${conf} (Z = ${f(z.a)})`;
+    }
+    let tail=`ได้ขนาดตัวอย่าง ${desc('base')}`;
+    if(deff>1)tail+=` เนื่องจากใช้การสุ่มแบบกลุ่มจึงปรับด้วยค่าอิทธิพลของการออกแบบ (design effect) เท่ากับ ${f(deff,2)}${iccMode?` (ขนาดกลุ่มเฉลี่ย ${cm} คน, ICC = ${icc})`:''} ได้ ${desc('deffN')}`;
+    if(dropout>0)tail+=` และเพื่อชดเชยการสูญหายหรือการไม่ตอบกลับร้อยละ ${dropout} จึงปรับขนาดตัวอย่างเป็น ${desc('final')}`;
+    if(G.length>1||G[0].mult>1)tail+=` รวมขนาดตัวอย่างทั้งสิ้น ${int(total)} ${unit}`;
+    else if(dropout>0||deff>1)tail+=` ดังนั้นขนาดตัวอย่างที่ใช้ในการศึกษาครั้งนี้ทั้งสิ้น ${int(total)} ${unit}`;
+    lastPara=(c.para(v,z,{conf,stat,tail})+` ทั้งนี้ คำนวณขนาดตัวอย่างด้วยโปรแกรม Sample Simple ${CITE.thIn}`).replace(/\s+/g,' ').trim();
+    lastRefs=[CITE.thRef,...refsFor(current,v,deff)];
+  }else{
+    const uEn=UNIT_EN[unit]||unit;
+    const sides=tails===2?'two-sided':'one-sided';
+    let stat='';
+    if(!c.noAlpha){
+      if(c.power)stat=c.exact?`a significance level of ${alpha}${c.noTail?'':` (${sides})`} and a power of ${Math.round(power*100)}%`
+        :`a significance level of ${alpha} (${sides}, Zα = ${f(z.a)}) and a power of ${Math.round(power*100)}% (Zβ = ${f(z.b)})`;
+      else stat=`a ${conf}% confidence level (Z = ${f(z.a)})`;
+    }
+    const d2=key=>{
+      if(G.length>1)return G.map(g=>`${int(g[key])} ${uEn} in ${GROUP_EN[g.label]||g.label}`).join(' and ');
+      if(pairs)return `${int(G[0][key])} matched pairs`;
+      if(G[0].mult>1)return `${int(G[0][key])} ${uEn} per group`;
+      return `${int(G[0][key])} ${uEn}`;};
+    let tail=`This yielded a required sample size of ${d2('base')}.`;
+    if(deff>1)tail+=` Because cluster sampling was used, this was multiplied by a design effect of ${f(deff,2)}${iccMode?` (average cluster size ${cm}, ICC = ${icc})`:''}, giving ${d2('deffN')}.`;
+    if(dropout>0)tail+=` To account for an anticipated attrition or non-response rate of ${dropout}%, the sample size was increased to ${d2('final')}.`;
+    if(G.length>1||G[0].mult>1)tail+=` The total sample size was therefore ${int(total)} ${pairs?'participants':uEn}.`;
+    lastPara=(EN[current](v,{stat,conf,z})+' '+tail+` Sample size calculations were performed using Sample Simple ${CITE.enIn.replace('&amp;','&')}.`).replace(/\s+/g,' ').trim();
+    lastRefs=[CITE.enRef,...refsFor(current,v,deff)].sort((a,b)=>a.localeCompare(b,'en'));
+  }
+  $('paragraph').textContent=lastPara;$('paragraph').lang=lang;
+  $('refList').innerHTML=lastRefs.map(r=>`<p>${r}</p>`).join('');
+}
+$('copyBtn').addEventListener('click',async()=>{
+  const btn=$('copyBtn');if(!lastPara)return;
+  try{await navigator.clipboard.writeText(lastPara);btn.textContent=t().ok;}
+  catch(e){const r=document.createRange();r.selectNodeContents($('paragraph'));const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent=t().fail;}
+  setTimeout(()=>btn.textContent=t().cp,2000);
+});
+async function copyRefs(){
+  const btn=$('copyRefs');if(!lastRefs.length)return;const html=lastRefs.map(r=>`<p>${r}</p>`).join('');
+  const tmp=document.createElement('div');tmp.innerHTML=html;const plain=[...tmp.querySelectorAll('p')].map(p=>p.textContent).join('\n');
+  try{
+    if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write)await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]);
+    else await navigator.clipboard.writeText(plain);
+    btn.textContent=t().ok;
+  }catch(e){try{await navigator.clipboard.writeText(plain);btn.textContent=t().ok;}catch(e2){const r=document.createRange();r.selectNodeContents($('refList'));const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent=t().fail;}}
+  setTimeout(()=>btn.textContent=t().cr,2000);
+}
+$('copyRefs').addEventListener('click',copyRefs);
+$('mbarBtn').addEventListener('click',()=>$('resultPanel').scrollIntoView({behavior:'smooth',block:'start'}));
+
+// ---------- decision guide ----------
+let wizPath=[];
+function closeDlg(){const d=$('dlg');try{d.close();}catch(e){d.removeAttribute('open');}}
+function wizRender(){
+  const W=lang==='en'?WIZ_EN:WIZ,T=t();
+  const node=wizPath[wizPath.length-1];
+  $('dlgStep').textContent=T.q(wizPath.length);
+  if(node.startsWith('=')){
+    const k=node.slice(1),c=CALCS[k];
+    $('dlgStep').textContent=T.recTitle;
+    $('dlgBody').innerHTML=`<h2 id="dlgQ">${T.recH}</h2><div class="rec"><b>${cName(c)}</b>${lang==='th'?`<i>${c.en}</i>`:''}<p>${lang==='en'?HINT_EN[k]:c.hint}</p></div>
+      <button class="use" type="button" id="wizUse">${T.use}</button><br><button class="back" type="button" id="wizBack">${T.back}</button>`;
+    $('wizUse').onclick=()=>{closeDlg();select(k);try{$('calcName').scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}};
+  }else{
+    const n=W[node];
+    $('dlgBody').innerHTML=`<h2 id="dlgQ">${n.q}</h2><div class="opts">${n.o.map((o,i)=>`<button class="opt" type="button" data-i="${i}"><b>${o[0]}</b>${o[1]?`<span>${o[1]}</span>`:''}</button>`).join('')}</div>${wizPath.length>1?`<button class="back" type="button" id="wizBack">${T.back}</button>`:''}`;
+    $('dlgBody').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{wizPath.push(n.o[+b.dataset.i][2]);wizRender();});
+  }
+  const bk=$('wizBack');if(bk)bk.onclick=()=>{wizPath.pop();wizRender();};
+}
+$('guideBtn').addEventListener('click',()=>{wizPath=['start'];wizRender();try{$('dlg').showModal();}catch(e){$('dlg').setAttribute('open','');}});
+$('dlgClose').addEventListener('click',closeDlg);
+$('dlg').addEventListener('click',e=>{if(e.target===$('dlg'))closeDlg();});
+
+applyLang();buildMobile();
+select((location.hash||'').slice(1)||'prop');
+</script>
+</body>
+</html>
